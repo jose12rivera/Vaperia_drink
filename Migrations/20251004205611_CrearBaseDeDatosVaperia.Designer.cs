@@ -11,7 +11,7 @@ using Vaperia_drink.Data;
 namespace Vaperia_drink.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251004195218_CrearBaseDeDatosVaperia")]
+    [Migration("20251004205611_CrearBaseDeDatosVaperia")]
     partial class CrearBaseDeDatosVaperia
     {
         /// <inheritdoc />

@@ -1,118 +1,73 @@
 ﻿@page "/Account/Register"
-@using Microsoft.AspNetCore.Identity
 @using Vaperia_drink.Data
 @inject UserManager<ApplicationUser> UserManager
-@inject SignInManager<ApplicationUser> SignInManager
 @inject NavigationManager NavigationManager
-
-<PageTitle>Crear Cuenta - Vapería</PageTitle>
 
 <div class="login-container">
     <div class="login-box">
-        <img src="/logo-vaperia.png" alt="Logo" class="login-icon" />
-        <h2>Crear cuenta</h2>
+        <h2>Crear Cuenta - Vapería</h2>
 
         @if (!string.IsNullOrEmpty(errorMessage))
         {
             <div class="alert alert-danger">@errorMessage</div>
         }
 
-        <EditForm Model="Input" OnValidSubmit="RegisterUser" FormName="register">
+        @if (!string.IsNullOrEmpty(successMessage))
+        {
+            <div class="alert alert-success">@successMessage</div>
+        }
+
+        <EditForm Model="@Input" OnValidSubmit="RegisterUser">
             <DataAnnotationsValidator />
+            <ValidationSummary />
 
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.NombreCompleto"
-                           class="form-control"
-                           placeholder="Juan Pérez" />
-                <label>Nombre completo</label>
-                <ValidationMessage For="() => Input.NombreCompleto" />
-            </div>
-
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email"
-                           class="form-control"
-                           placeholder="correo@ejemplo.com" />
+            <div class="form-group mb-3">
                 <label>Correo Electrónico</label>
-                <ValidationMessage For="() => Input.Email" />
+                <InputText class="form-control" @bind-Value="Input.Email" />
             </div>
 
-            <div class="form-floating mb-3">
-                <InputText type="password"
-                           @bind-Value="Input.Password"
-                           class="form-control"
-                           placeholder="Contraseña" />
-                <label>Contraseña (mínimo 6 caracteres)</label>
-                <ValidationMessage For="() => Input.Password" />
+            <div class="form-group mb-3">
+                <label>Contraseña</label>
+                <InputText type="password" class="form-control" @bind-Value="Input.Password" />
             </div>
 
-            <div class="form-floating mb-3">
-                <InputText type="password"
-                           @bind-Value="Input.ConfirmPassword"
-                           class="form-control"
-                           placeholder="Confirmar" />
-                <label>Confirmar contraseña</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" />
+            <div class="form-group mb-3">
+                <label>Confirmar Contraseña</label>
+                <InputText type="password" class="form-control" @bind-Value="Input.ConfirmPassword" />
             </div>
 
-            <div class="form-floating mb-3">
-                <InputSelect @bind-Value="Input.Rol" class="form-control">
-                    <option value="vendedor">Vendedor</option>
-                    <option value="admin">Administrador</option>
-                </InputSelect>
-                <label>Rol</label>
-            </div>
-
-            <div class="mb-3">
-                <label>Subir foto (Opcional)</label>
-                <InputFile OnChange="OnFileSelected" class="form-control" />
-            </div>
-
-            <button type="submit" class="btn-submit">Crear cuenta</button>
-
-            <div class="links">
-                <p><a href="/Account/Login">¿Ya tienes cuenta? Inicia sesión</a></p>
-            </div>
+            <button type="submit" class="btn-submit">Guardar Usuario</button>
         </EditForm>
+
+        <div class="links mt-3">
+            <a href="/Account/Login">¿Ya tienes cuenta? Inicia sesión</a>
+        </div>
     </div>
 </div>
 
 @code {
     private string? errorMessage;
-    private byte[]? fotoBytes;
-
-    [SupplyParameterFromForm]
-    private InputModel Input { get; set; } = new();
-
-    private async Task OnFileSelected(InputFileChangeEventArgs e)
-    {
-        var file = e.File;
-        if (file != null)
-        {
-            using var ms = new MemoryStream();
-            await file.OpenReadStream().CopyToAsync(ms);
-            fotoBytes = ms.ToArray();
-        }
-    }
+    private string? successMessage;
+    private InputModel Input = new();
 
     private async Task RegisterUser()
     {
-        var user = new ApplicationUser
-            {
-                UserName = Input.Email,
-                Email = Input.Email
-                
-                // ,
-                // NombreCompleto = Input.NombreCompleto,
-                // Rol = Input.Rol,
-                // Foto = fotoBytes
-            };
+        errorMessage = null;
+        successMessage = null;
 
+        if (Input.Password != Input.ConfirmPassword)
+        {
+            errorMessage = "Las contraseñas no coinciden";
+            return;
+        }
+
+        var user = new ApplicationUser { UserName = Input.Email, Email = Input.Email };
         var result = await UserManager.CreateAsync(user, Input.Password);
 
         if (result.Succeeded)
         {
-            await SignInManager.SignInAsync(user, isPersistent: false);
-            NavigationManager.NavigateTo("/Menu");
+            successMessage = "Usuario registrado correctamente. Ahora puedes iniciar sesión.";
+            Input = new InputModel(); // Limpiar formulario
         }
         else
         {
@@ -122,20 +77,15 @@
 
     private sealed class InputModel
     {
-        [Required(ErrorMessage = "El nombre es obligatorio")]
-        public string NombreCompleto { get; set; } = "";
-
         [Required(ErrorMessage = "El correo es obligatorio")]
         [EmailAddress(ErrorMessage = "Correo inválido")]
         public string Email { get; set; } = "";
 
         [Required(ErrorMessage = "La contraseña es obligatoria")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "Mínimo 6 caracteres")]
+        [MinLength(6, ErrorMessage = "Debe tener al menos 6 caracteres")]
         public string Password { get; set; } = "";
 
-        [Compare(nameof(Password), ErrorMessage = "Las contraseñas no coinciden")]
+        [Required(ErrorMessage = "Confirma la contraseña")]
         public string ConfirmPassword { get; set; } = "";
-
-        public string Rol { get; set; } = "vendedor";
     }
 }

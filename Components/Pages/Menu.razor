@@ -7,7 +7,6 @@
 <div class="menu">
     <h1 class="menu-title">MENÚ VAPERÍA</h1>
 
-    @* Fila 1 *@
     <div class="menu-row">
         <a href="/Venta/Nueva" class="menu-item">
             <img src="/icons/venta.png" alt="Nueva Venta" />
@@ -23,7 +22,6 @@
         </a>
     </div>
 
-    @* Fila 2 *@
     <div class="menu-row">
         <a href="/Cliente/Index" class="menu-item">
             <img src="/icons/clientes.png" alt="Clientes" />
@@ -39,7 +37,6 @@
         </a>
     </div>
 
-    @* Fila 3 (Solo Admin) *@
     <AuthorizeView Roles="admin">
         <div class="menu-row">
             <a href="/Usuario/Index" class="menu-item">

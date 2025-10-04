@@ -1,53 +1,66 @@
-﻿@page "/Account/Login"
-@using Microsoft.AspNetCore.Identity
+﻿@page "/"
 @using Vaperia_drink.Data
 @inject SignInManager<ApplicationUser> SignInManager
+@inject ILogger<Login> Logger
 @inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Inicio de Sesión - Vapería</PageTitle>
+<PageTitle>Inicio de Sesión</PageTitle>
 
 <div class="login-container">
     <div class="login-box">
-        <img src="/logo-vaperia.png" alt="Logo Vapería" class="login-icon" />
-        <h2>Vapería SAHARA</h2>
+        <h2>Prestamos SRL</h2>
+        <img src="/Rectangle 101.png" alt="Icono Login" class="login-icon" />
 
-        @if (!string.IsNullOrEmpty(errorMessage))
-        {
-            <div class="alert alert-danger">@errorMessage</div>
-        }
+        <StatusMessage Message="@errorMessage" />
 
-        <EditForm Model="Input" OnValidSubmit="LoginUser" FormName="login">
+        <EditForm Model="Input" method="post" OnValidSubmit="LoginUser" FormName="login">
             <DataAnnotationsValidator />
 
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email"
-                           class="form-control"
-                           placeholder="correo@ejemplo.com" />
-                <label>Correo Electrónico</label>
-                <ValidationMessage For="() => Input.Email" class="text-danger" />
+            @*Correo Electrónico*@
+            <div class="form-group">
+                <div class="form-floating mb-3">
+                    <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="nombre_usuario@gmail.com" />
+                    <label for="email" class="form-label">Correo Electrónico</label>
+                    <ValidationMessage For="() => Input.Email" class="text-danger" />
+                </div>
             </div>
 
-            <div class="form-floating mb-3">
-                <InputText type="password"
-                           @bind-Value="Input.Password"
-                           class="form-control"
-                           placeholder="Contraseña" />
-                <label>Contraseña</label>
-                <ValidationMessage For="() => Input.Password" class="text-danger" />
+            @* Contraseña *@
+            <div class="form-group">
+                <div class="form-floating mb-3">
+                    <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="current-password" aria-required="true" placeholder="Contraseña" />
+                    <label for="password" class="form-label">Contraseña</label>
+                    <ValidationMessage For="() => Input.Password" class="text-danger" />
+                </div>
             </div>
 
-            <div class="checkbox-container mb-3">
-                <label>
-                    <InputCheckbox @bind-Value="Input.RememberMe" class="form-check-input" />
-                    Recordarme
-                </label>
+            @*Recordarme *@
+            <div class="checkbox-container">
+                <div class="checkbox mb-0">
+                    <label class="form-label">
+                        <InputCheckbox @bind-Value="Input.RememberMe" class="darker-border-checkbox form-check-input" />
+                        Recordar
+                    </label>
+                </div>
             </div>
 
-            <button type="submit" class="btn-submit">Iniciar Sesión</button>
+            @* Boton de entrar*@
+            <div>
+                <button type="submit" class="btn-submit">Entrar</button>
+            </div>
 
+            @* Enlaces *@
             <div class="links">
-                <p><a href="/Account/Register">¿No tienes cuenta? Regístrate</a></p>
-                <p><a href="/Account/ForgotPassword">¿Olvidaste tu contraseña?</a></p>
+                <p>
+                    <a href="Account/ForgotPassword">¿Olvidaste tu contraseña?</a>
+                </p>
+                <p>
+                    <a href="@(NavigationManager.GetUriWithQueryParameters("Account/Register", new Dictionary<string, object?> { ["ReturnUrl"] = ReturnUrl }))">Registrarse como nuevo usuario</a>
+                </p>
+                <p>
+                    <a href="Account/ResendEmailConfirmation">Reenviar confirmación de correo</a>
+                </p>
             </div>
         </EditForm>
     </div>
@@ -56,31 +69,45 @@
 @code {
     private string? errorMessage;
 
+    [CascadingParameter]
+    private HttpContext HttpContext { get; set; } = default!;
+
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
 
-    private async Task LoginUser()
-    {
-        var result = await SignInManager.PasswordSignInAsync(
-            Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
 
+    protected override async Task OnInitializedAsync()
+    {
+        if (HttpMethods.IsGet(HttpContext.Request.Method))
+        {
+            await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
+        }
+    }
+
+    public async Task LoginUser()
+    {
+        var result = await SignInManager.PasswordSignInAsync(Input.Email, Input.Password, Input.RememberMe, lockoutOnFailure: false);
         if (result.Succeeded)
         {
-            NavigationManager.NavigateTo("/Menu");
+            Logger.LogInformation("Usuario logueado.");
+            RedirectManager.RedirectTo("/Menu");
         }
         else
         {
-            errorMessage = "Correo o contraseña incorrectos";
+            errorMessage = "Error: Intento de inicio de sesión inválido.";
         }
     }
 
     private sealed class InputModel
     {
-        [Required(ErrorMessage = "El correo es obligatorio")]
-        [EmailAddress(ErrorMessage = "Correo inválido")]
+        [Required]
+        [EmailAddress]
         public string Email { get; set; } = "";
 
-        [Required(ErrorMessage = "La contraseña es obligatoria")]
+        [Required]
+        [DataType(DataType.Password)]
         public string Password { get; set; } = "";
 
         public bool RememberMe { get; set; }
