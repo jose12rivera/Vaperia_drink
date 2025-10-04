@@ -1,23 +1,107 @@
 ﻿@inherits LayoutComponentBase
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject NavigationManager NavigationManager
 
-<div class="page">
-    <div class="sidebar">
-        <NavMenu />
+<link href="css/CobroCreate.css" rel="stylesheet" />
+
+<Toasts class="p-3" AutoHide="true" Delay="4000" Placement="ToastsPlacement.TopRight" />
+
+<div class="card layout-card">
+    <!-- 🔹 Barra superior -->
+    <div class="top-row px-7">
+        <div class="menu-floating custom-align">
+            <!-- 🟢 Logo e ícono principal -->
+            <AuthorizeView>
+                <Authorized>
+                    <a href="/Menu" class="vaperia-item">
+                        <img src="~/bootstrap/vaperia.png" alt="Logo Vapería SRL" class="vaperia-icon" />
+                        <span class="vaperia-text">Vapería SRL</span>
+                    </a>
+                </Authorized>
+                <NotAuthorized>
+                    <a href="/" class="vaperia-item">
+                        <img src="/Rectangle 101.png" alt="Logo Vapería SRL" class="vaperia-icon" />
+                        <span class="vaperia-text">Vapería SRL</span>
+                    </a>
+                </NotAuthorized>
+            </AuthorizeView>
+
+            <!-- 🔹 Menú de usuario -->
+            <div class="user-container">
+                @* <a href="https://wa.me/8494665689?text=Hola,%20necesito%20soporte%20en%20el%20sistema" *@
+                @*    target="_blank" *@
+                @*    class="menu-floating-item soporte"> *@
+                @*     <i class="fas fa-life-ring"></i> Soporte Jose *@
+                @* </a> *@
+
+                @* <a href="https://github.com/Cape23180909/ProyectoFinalAp1.git" *@
+                @*    target="_blank" *@
+                @*    class="menu-floating-item contacto"> *@
+                @*     <i class="fas fa-envelope"></i> Contacto *@
+                @* </a> *@
+
+                @if (IsAuthenticated)
+                {
+                    <span class="user-name">Usuario: @userName</span>
+
+                    <form action="Account/Logout" method="post" class="logout-form">
+                        <AntiforgeryToken />
+                        <input type="hidden" name="ReturnUrl" value="" />
+                        <button type="submit" class="btn-logout">
+                            <i class="fas fa-sign-out-alt"></i> Cerrar Sesión
+                        </button>
+                    </form>
+                }
+            </div>
+        </div>
     </div>
 
-    <main>
-        <div class="top-row px-4">
-            <a href="https://learn.microsoft.com/aspnet/core/" target="_blank">About</a>
-        </div>
-
-        <article class="content px-4">
-            @Body
-        </article>
-    </main>
+    <!-- 🔹 Contenido principal -->
+    <div class="content" style="margin-top: 1rem; margin-bottom: 1rem;">
+        @Body
+    </div>
 </div>
 
-<div id="blazor-error-ui">
-    An unhandled error has occurred.
-    <a href="" class="reload">Reload</a>
-    <a class="dismiss">🗙</a>
+<!-- 🔹 Pie de página -->
+<div class="card mt-5 footer-card">
+    <div class="top-row px-4">
+        <footer class="footer">
+            <p>© 2025 Vapería SRL | Todos los derechos reservados</p>
+        </footer>
+    </div>
 </div>
+
+@code {
+    [CascadingParameter]
+    private Task<AuthenticationState> AuthenticationState { get; set; } = default!;
+
+    private bool IsAuthenticated { get; set; }
+    private string userName = string.Empty;
+    private string? currentUrl;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        IsAuthenticated = authState.User.Identity?.IsAuthenticated ?? false;
+
+        if (IsAuthenticated)
+            userName = authState.User.Identity?.Name ?? "Usuario";
+
+        currentUrl = NavigationManager.ToBaseRelativePath(NavigationManager.Uri);
+        NavigationManager.LocationChanged += OnLocationChanged;
+    }
+
+    private void OnLocationChanged(object? sender, LocationChangedEventArgs e)
+    {
+        currentUrl = NavigationManager.ToBaseRelativePath(e.Location);
+        if (currentUrl.Equals("Account/Logout", StringComparison.OrdinalIgnoreCase))
+            NavigationManager.NavigateTo("/Account/Login");
+
+        StateHasChanged();
+    }
+
+    public void Dispose()
+    {
+        NavigationManager.LocationChanged -= OnLocationChanged;
+    }
+}

@@ -1,0 +1,51 @@
+﻿@page "/Menu"
+@using Microsoft.AspNetCore.Authorization
+@attribute [Authorize]
+
+<PageTitle>Menú - Vapería</PageTitle>
+
+<div class="menu">
+    <h1 class="menu-title">MENÚ VAPERÍA</h1>
+
+    @* Fila 1 *@
+    <div class="menu-row">
+        <a href="/Venta/Nueva" class="menu-item">
+            <img src="/icons/venta.png" alt="Nueva Venta" />
+            <span>Nueva Venta</span>
+        </a>
+        <a href="/Producto/Index" class="menu-item">
+            <img src="/icons/productos.png" alt="Productos" />
+            <span>Productos</span>
+        </a>
+        <a href="/Inventario/Index" class="menu-item">
+            <img src="/icons/inventario.png" alt="Inventario" />
+            <span>Inventario</span>
+        </a>
+    </div>
+
+    @* Fila 2 *@
+    <div class="menu-row">
+        <a href="/Cliente/Index" class="menu-item">
+            <img src="/icons/clientes.png" alt="Clientes" />
+            <span>Clientes</span>
+        </a>
+        <a href="/Factura/Index" class="menu-item">
+            <img src="/icons/facturas.png" alt="Facturas" />
+            <span>Facturas</span>
+        </a>
+        <a href="/Estadistica/Index" class="menu-item">
+            <img src="/icons/estadisticas.png" alt="Estadísticas" />
+            <span>Estadísticas</span>
+        </a>
+    </div>
+
+    @* Fila 3 (Solo Admin) *@
+    <AuthorizeView Roles="admin">
+        <div class="menu-row">
+            <a href="/Usuario/Index" class="menu-item">
+                <img src="/icons/usuarios.png" alt="Usuarios" />
+                <span>Usuarios</span>
+            </a>
+        </div>
+    </AuthorizeView>
+</div>

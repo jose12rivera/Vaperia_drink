@@ -1,0 +1,66 @@
+﻿.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 90vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+}
+
+.login-box {
+    background: white;
+    padding: 2.5rem;
+    border-radius: 20px;
+    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    text-align: center;
+    width: 100%;
+    max-width: 400px;
+}
+
+.login-icon {
+    width: 100px;
+    height: 100px;
+    margin-bottom: 1rem;
+    border-radius: 50%;
+}
+
+.login-box h2 {
+    color: #333;
+    margin-bottom: 2rem;
+    font-weight: 700;
+}
+
+.btn-submit {
+    width: 100%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    padding: 0.75rem;
+    border-radius: 10px;
+    font-weight: bold;
+    font-size: 1.1rem;
+    transition: all 0.3s;
+    cursor: pointer;
+}
+
+    .btn-submit:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    }
+
+.links {
+    margin-top: 1.5rem;
+}
+
+    .links a {
+        color: #667eea;
+        text-decoration: none;
+        font-size: 0.9rem;
+    }
+
+        .links a:hover {
+            text-decoration: underline;
+        }
+
+.checkbox-container {
+    text-align: left;
+}
