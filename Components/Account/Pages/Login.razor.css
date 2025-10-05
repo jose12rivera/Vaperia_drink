@@ -1,66 +1,179 @@
-﻿.login-container {
+﻿/* --- RESET & BASE --- */
+html, body {
+    height: 100%;
+    margin: 0;
+    font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif;
+    background-color: #f5f5f5;
+}
+
+a {
+    text-decoration: none;
+    color: #00d084;
+}
+
+    a:hover {
+        text-decoration: underline;
+    }
+
+h1, h2, h3, h4, h5, h6 {
+    margin: 0;
+}
+
+/* --- LOGIN CONTAINER --- */
+.login-container {
     display: flex;
     justify-content: center;
     align-items: center;
-    min-height: 90vh;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    min-height: 100vh;
+    padding: 1rem;
+    background: #f5f5f5;
 }
 
 .login-box {
-    background: white;
-    padding: 2.5rem;
-    border-radius: 20px;
-    box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    background: #ffffff;
+    padding: 3rem 2.5rem;
+    border-radius: 10px;
+    box-shadow: 0 2px 15px rgba(0,0,0,0.08);
     text-align: center;
     width: 100%;
     max-width: 400px;
+    transition: transform 0.3s;
 }
 
+    .login-box:hover {
+        transform: translateY(-3px);
+    }
+
+/* --- LOGO --- */
 .login-icon {
-    width: 100px;
-    height: 100px;
+    width: 80px;
+    height: 80px;
     margin-bottom: 1rem;
-    border-radius: 50%;
+    border-radius: 8px;
+    object-fit: cover;
 }
 
+/* --- TITULO --- */
 .login-box h2 {
-    color: #333;
+    font-size: 1.75rem;
+    font-weight: 600;
+    color: #1a1a1a;
     margin-bottom: 2rem;
-    font-weight: 700;
 }
 
+/* --- FORM --- */
+.form-group {
+    margin-bottom: 1.5rem;
+    text-align: left;
+}
+
+.form-label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+    font-size: 0.9rem;
+    color: #333;
+}
+
+.form-control {
+    width: 100%;
+    padding: 0.75rem 1rem;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    background: #fafafa;
+    transition: all 0.3s;
+}
+
+    .form-control:focus {
+        outline: none;
+        border-color: #00d084;
+        background: #fff;
+        box-shadow: 0 0 0 0.2rem rgba(0,208,132,0.25);
+    }
+
+    .form-control::placeholder {
+        color: #999;
+    }
+
+/* --- VALIDATION --- */
+.text-danger {
+    color: #c33;
+    font-size: 0.85rem;
+    margin-top: 0.25rem;
+}
+
+.alert-danger {
+    background-color: #fee;
+    color: #c33;
+    padding: 0.75rem;
+    border-radius: 6px;
+    margin-bottom: 1rem;
+    border: 1px solid #fcc;
+    font-size: 0.9rem;
+}
+
+/* --- BOTON --- */
 .btn-submit {
     width: 100%;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    padding: 0.85rem;
+    font-size: 1rem;
+    font-weight: 600;
+    border-radius: 6px;
     border: none;
-    color: white;
-    padding: 0.75rem;
-    border-radius: 10px;
-    font-weight: bold;
-    font-size: 1.1rem;
-    transition: all 0.3s;
     cursor: pointer;
+    background: linear-gradient(90deg, #00d084, #00b872);
+    color: #fff;
+    transition: all 0.3s;
+    margin-top: 1rem;
 }
 
     .btn-submit:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+        background: linear-gradient(90deg, #00b872, #009f65);
+        transform: translateY(-1px);
     }
 
+    .btn-submit:active {
+        transform: translateY(0);
+    }
+
+/* --- LINKS --- */
 .links {
     margin-top: 1.5rem;
+    font-size: 0.9rem;
 }
 
     .links a {
-        color: #667eea;
-        text-decoration: none;
-        font-size: 0.9rem;
+        font-weight: 500;
     }
 
-        .links a:hover {
-            text-decoration: underline;
-        }
+/* --- RESPONSIVE --- */
+@media (max-width: 480px) {
+    .login-box {
+        padding: 2rem 1.5rem;
+    }
 
-.checkbox-container {
-    text-align: left;
+    .login-icon {
+        width: 60px;
+        height: 60px;
+    }
+}
+
+/* --- ERROR BOUNDARY BLASOR --- */
+.blazor-error-boundary {
+    background-color: #b32121;
+    color: white;
+    padding: 1rem 1rem 1rem 3.7rem;
+    border-radius: 6px;
+    font-size: 0.9rem;
+    position: relative;
+}
+
+    .blazor-error-boundary::after {
+        content: "An error has occurred.";
+    }
+
+/* --- CHECKBOXES --- */
+.darker-border-checkbox.form-check-input {
+    border-color: #929292;
 }

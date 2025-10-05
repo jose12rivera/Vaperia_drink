@@ -14,13 +14,13 @@
             <AuthorizeView>
                 <Authorized>
                     <a href="/Menu" class="vaperia-item">
-                        <img src="~/bootstrap/vaperia.png" alt="Logo Vapería SRL" class="vaperia-icon" />
+                        <img src="/vaperia.png" alt="Logo Vapería SRL" class="vaperia-icon" />
                         <span class="vaperia-text">Vapería SRL</span>
                     </a>
                 </Authorized>
                 <NotAuthorized>
                     <a href="/" class="vaperia-item">
-                        <img src="/Rectangle 101.png" alt="Logo Vapería SRL" class="vaperia-icon" />
+                        <img src="/vaperia.png" alt="Logo Vapería SRL" class="vaperia-icon" />
                         <span class="vaperia-text">Vapería SRL</span>
                     </a>
                 </NotAuthorized>
@@ -28,17 +28,11 @@
 
             <!-- 🔹 Menú de usuario -->
             <div class="user-container">
-                @* <a href="https://wa.me/8494665689?text=Hola,%20necesito%20soporte%20en%20el%20sistema" *@
-                @*    target="_blank" *@
-                @*    class="menu-floating-item soporte"> *@
-                @*     <i class="fas fa-life-ring"></i> Soporte Jose *@
-                @* </a> *@
-
-                @* <a href="https://github.com/Cape23180909/ProyectoFinalAp1.git" *@
-                @*    target="_blank" *@
-                @*    class="menu-floating-item contacto"> *@
-                @*     <i class="fas fa-envelope"></i> Contacto *@
-                @* </a> *@
+                <a href="https://wa.me/8494665689?text=Hola,%20necesito%20soporte%20en%20el%20sistema"
+                   target="_blank"
+                   class="menu-floating-item soporte">
+                    <i class="fas fa-life-ring"></i> Soporte Jose
+                </a>
 
                 @if (IsAuthenticated)
                 {

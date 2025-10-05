@@ -1,141 +1,147 @@
 ﻿@page "/Account/Register"
+
+@using System.ComponentModel.DataAnnotations
+@using System.Text
+@using System.Text.Encodings.Web
 @using Microsoft.AspNetCore.Identity
+@using Microsoft.AspNetCore.WebUtilities
 @using Vaperia_drink.Data
+
 @inject UserManager<ApplicationUser> UserManager
+@inject IUserStore<ApplicationUser> UserStore
 @inject SignInManager<ApplicationUser> SignInManager
+@inject IEmailSender<ApplicationUser> EmailSender
+@inject ILogger<Register> Logger
 @inject NavigationManager NavigationManager
+@inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Crear Cuenta - Vapería</PageTitle>
+<PageTitle>Register</PageTitle>
 
-<div class="login-container">
-    <div class="login-box">
-        <img src="/logo-vaperia.png" alt="Logo" class="login-icon" />
+<div class="register-container">
+    <div class="register-box">
+        <img src="/vaperia.png" alt="Logo Vapería" class="login-icon" />
         <h2>Crear cuenta</h2>
 
-        @if (!string.IsNullOrEmpty(errorMessage))
+        @if (!string.IsNullOrEmpty(Message))
         {
-            <div class="alert alert-danger">@errorMessage</div>
+            <div class="alert-danger">@Message</div>
         }
 
         <EditForm Model="Input" OnValidSubmit="RegisterUser" FormName="register">
             <DataAnnotationsValidator />
 
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.NombreCompleto"
-                           class="form-control"
-                           placeholder="Juan Pérez" />
-                <label>Nombre completo</label>
-                <ValidationMessage For="() => Input.NombreCompleto" />
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <InputText @bind-Value="Input.Email" class="form-control" placeholder="Correo electrónico" autocomplete="username" />
+                <ValidationMessage For="() => Input.Email" class="text-danger" />
             </div>
 
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email"
-                           class="form-control"
-                           placeholder="correo@ejemplo.com" />
-                <label>Correo Electrónico</label>
-                <ValidationMessage For="() => Input.Email" />
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <InputText type="password" @bind-Value="Input.Password" class="form-control" placeholder="Contraseña" autocomplete="new-password" />
+                <ValidationMessage For="() => Input.Password" class="text-danger" />
             </div>
 
-            <div class="form-floating mb-3">
-                <InputText type="password"
-                           @bind-Value="Input.Password"
-                           class="form-control"
-                           placeholder="Contraseña" />
-                <label>Contraseña (mínimo 6 caracteres)</label>
-                <ValidationMessage For="() => Input.Password" />
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" placeholder="Confirmar contraseña" autocomplete="new-password" />
+                <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
 
-            <div class="form-floating mb-3">
-                <InputText type="password"
-                           @bind-Value="Input.ConfirmPassword"
-                           class="form-control"
-                           placeholder="Confirmar" />
-                <label>Confirmar contraseña</label>
-                <ValidationMessage For="() => Input.ConfirmPassword" />
-            </div>
-
-            <div class="form-floating mb-3">
-                <InputSelect @bind-Value="Input.Rol" class="form-control">
-                    <option value="vendedor">Vendedor</option>
-                    <option value="admin">Administrador</option>
-                </InputSelect>
-                <label>Rol</label>
-            </div>
-
-            <div class="mb-3">
-                <label>Subir foto (Opcional)</label>
-                <InputFile OnChange="OnFileSelected" class="form-control" />
-            </div>
-
-            <button type="submit" class="btn-submit">Crear cuenta</button>
+            <button type="submit" class="btn-submit">Register</button>
 
             <div class="links">
-                <p><a href="/Account/Login">¿Ya tienes cuenta? Inicia sesión</a></p>
+                <a href="/Account/Login">¿Ya tienes una cuenta? Iniciar sesión</a>
             </div>
         </EditForm>
     </div>
 </div>
 
 @code {
-    private string? errorMessage;
-    private byte[]? fotoBytes;
+    private IEnumerable<IdentityError>? identityErrors;
 
     [SupplyParameterFromForm]
     private InputModel Input { get; set; } = new();
 
-    private async Task OnFileSelected(InputFileChangeEventArgs e)
+    [SupplyParameterFromQuery]
+    private string? ReturnUrl { get; set; }
+
+    private string? Message => identityErrors is null ? null : $"Error: {string.Join(", ", identityErrors.Select(error => error.Description))}";
+
+    public async Task RegisterUser(EditContext editContext)
     {
-        var file = e.File;
-        if (file != null)
+        var user = CreateUser();
+        await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
+        var emailStore = GetEmailStore();
+        await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
+        var result = await UserManager.CreateAsync(user, Input.Password);
+
+        if (!result.Succeeded)
         {
-            using var ms = new MemoryStream();
-            await file.OpenReadStream().CopyToAsync(ms);
-            fotoBytes = ms.ToArray();
+            identityErrors = result.Errors;
+            return;
+        }
+
+        Logger.LogInformation("User created a new account with password.");
+
+        var userId = await UserManager.GetUserIdAsync(user);
+        var code = await UserManager.GenerateEmailConfirmationTokenAsync(user);
+        code = WebEncoders.Base64UrlEncode(Encoding.UTF8.GetBytes(code));
+        var callbackUrl = NavigationManager.GetUriWithQueryParameters(
+            NavigationManager.ToAbsoluteUri("Account/ConfirmEmail").AbsoluteUri,
+            new Dictionary<string, object?> { ["userId"] = userId, ["code"] = code, ["returnUrl"] = ReturnUrl });
+
+        await EmailSender.SendConfirmationLinkAsync(user, Input.Email, HtmlEncoder.Default.Encode(callbackUrl));
+
+        if (UserManager.Options.SignIn.RequireConfirmedAccount)
+        {
+            RedirectManager.RedirectTo(
+                "Account/RegisterConfirmation",
+                new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+            return;
+        }
+
+        await SignInManager.SignInAsync(user, isPersistent: false);
+        RedirectManager.RedirectTo(ReturnUrl);
+    }
+
+    private ApplicationUser CreateUser()
+    {
+        try
+        {
+            return Activator.CreateInstance<ApplicationUser>();
+        }
+        catch
+        {
+            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. Ensure that it has a parameterless constructor.");
         }
     }
 
-    private async Task RegisterUser()
+    private IUserEmailStore<ApplicationUser> GetEmailStore()
     {
-        var user = new ApplicationUser
-            {
-                UserName = Input.Email,
-                Email = Input.Email
-                
-                // ,
-                // NombreCompleto = Input.NombreCompleto,
-                // Rol = Input.Rol,
-                // Foto = fotoBytes
-            };
-
-        var result = await UserManager.CreateAsync(user, Input.Password);
-
-        if (result.Succeeded)
+        if (!UserManager.SupportsUserEmail)
         {
-            await SignInManager.SignInAsync(user, isPersistent: false);
-            NavigationManager.NavigateTo("/Menu");
+            throw new NotSupportedException("The default UI requires a user store with email support.");
         }
-        else
-        {
-            errorMessage = string.Join(", ", result.Errors.Select(e => e.Description));
-        }
+        return (IUserEmailStore<ApplicationUser>)UserStore;
     }
 
     private sealed class InputModel
     {
-        [Required(ErrorMessage = "El nombre es obligatorio")]
-        public string NombreCompleto { get; set; } = "";
-
-        [Required(ErrorMessage = "El correo es obligatorio")]
-        [EmailAddress(ErrorMessage = "Correo inválido")]
+        [Required]
+        [EmailAddress]
+        [Display(Name = "Email")]
         public string Email { get; set; } = "";
 
-        [Required(ErrorMessage = "La contraseña es obligatoria")]
-        [StringLength(100, MinimumLength = 6, ErrorMessage = "Mínimo 6 caracteres")]
+        [Required]
+        [StringLength(100, ErrorMessage = "La {0} debe tener al menos {2} y máximo {1} caracteres.", MinimumLength = 6)]
+        [DataType(DataType.Password)]
+        [Display(Name = "Password")]
         public string Password { get; set; } = "";
 
-        [Compare(nameof(Password), ErrorMessage = "Las contraseñas no coinciden")]
+        [DataType(DataType.Password)]
+        [Display(Name = "Confirm password")]
+        [Compare("Password", ErrorMessage = "La contraseña y la confirmación no coinciden.")]
         public string ConfirmPassword { get; set; } = "";
-
-        public string Rol { get; set; } = "vendedor";
     }
 }

@@ -1,51 +1,167 @@
-﻿@page "/Menu"
-@using Microsoft.AspNetCore.Authorization
-@attribute [Authorize]
+﻿@page "/Dashboard"
+@using Microsoft.AspNetCore.Identity
 
-<PageTitle>Menú - Vapería</PageTitle>
 
-<div class="menu">
-    <h1 class="menu-title">MENÚ VAPERÍA</h1>
+<link rel="stylesheet" href="dashboard.css">
 
-    @* Fila 1 *@
-    <div class="menu-row">
-        <a href="/Venta/Nueva" class="menu-item">
-            <img src="/icons/venta.png" alt="Nueva Venta" />
-            <span>Nueva Venta</span>
-        </a>
-        <a href="/Producto/Index" class="menu-item">
-            <img src="/icons/productos.png" alt="Productos" />
-            <span>Productos</span>
-        </a>
-        <a href="/Inventario/Index" class="menu-item">
-            <img src="/icons/inventario.png" alt="Inventario" />
-            <span>Inventario</span>
-        </a>
-    </div>
-
-    @* Fila 2 *@
-    <div class="menu-row">
-        <a href="/Cliente/Index" class="menu-item">
-            <img src="/icons/clientes.png" alt="Clientes" />
-            <span>Clientes</span>
-        </a>
-        <a href="/Factura/Index" class="menu-item">
-            <img src="/icons/facturas.png" alt="Facturas" />
-            <span>Facturas</span>
-        </a>
-        <a href="/Estadistica/Index" class="menu-item">
-            <img src="/icons/estadisticas.png" alt="Estadísticas" />
-            <span>Estadísticas</span>
-        </a>
-    </div>
-
-    @* Fila 3 (Solo Admin) *@
-    <AuthorizeView Roles="admin">
-        <div class="menu-row">
-            <a href="/Usuario/Index" class="menu-item">
-                <img src="/icons/usuarios.png" alt="Usuarios" />
-                <span>Usuarios</span>
-            </a>
+<div class="dashboard-wrapper">
+    <div class="sidebar">
+        <ul class="sidebar-menu">
+            <li class="active">
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
+                </svg>
+                Inicio/Dashboard
+            </li>
+            <li>
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                Productos
+            </li>
+            <li>
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                Inventario
+            </li>
+            <li>
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M4 4a2 2 0 00-2 2v1h16V6a2 2 0 00-2-2H4z" />
+                    <path fill-rule="evenodd" d="M18 9H2v5a2 2 0 002 2h12a2 2 0 002-2V9zM4 13a1 1 0 011-1h1a1 1 0 110 2H5a1 1 0 01-1-1zm5-1a1 1 0 100 2h1a1 1 0 100-2H9z" clip-rule="evenodd" />
+                </svg>
+                Ventas
+            </li>
+            <li>
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                </svg>
+                Clientes
+            </li>
+            <li>
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" />
+                </svg>
+                Usuarios
+            </li>
+            <li>
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clip-rule="evenodd" />
+                </svg>
+                Facturas
+            </li>
+            <li>
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M2 11a1 1 0 011-1h2a1 1 0 011 1v5a1 1 0 01-1 1H3a1 1 0 01-1-1v-5zM8 7a1 1 0 011-1h2a1 1 0 011 1v9a1 1 0 01-1 1H9a1 1 0 01-1-1V7zM14 4a1 1 0 011-1h2a1 1 0 011 1v12a1 1 0 01-1 1h-2a1 1 0 01-1-1V4z" />
+                </svg>
+                Estadísticas
+            </li>
+            <li>
+                <svg fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" />
+                </svg>
+                Mi Perfil
+            </li>
+        </ul>
+        <div class="logout" @onclick="Logout">
+            <svg fill="currentColor" viewBox="0 0 20 20" style="width:20px;height:20px">
+                <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
+            </svg>
+            Cerrar Sesión
         </div>
-    </AuthorizeView>
+
+    </div>
+
+    <div class="main-content">
+        <h1 class="dashboard-title">Dashboard</h1>
+
+        <div class="stats-container">
+            <div class="stat-card">
+                <div class="stat-label">Total de ventas del día</div>
+                <div class="stat-value">$2,500</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-label">Total de ventas del mes</div>
+                <div class="stat-value">$15,000</div>
+            </div>
+        </div>
+
+        <h2 class="section-title">Resumen de Ventas</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad</th>
+                        <th>Precio Unitario</th>
+                        <th>Total</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>vape</td>
+                        <td class="price">5</td>
+                        <td class="price">$100</td>
+                        <td class="price">$500</td>
+                    </tr>
+                    <tr>
+                        <td>hooka</td>
+                        <td class="price">10</td>
+                        <td class="price">$50</td>
+                        <td class="price">$500</td>
+                    </tr>
+                    <tr>
+                        <td>liquidos</td>
+                        <td class="price">2</td>
+                        <td class="price">$250</td>
+                        <td class="price">$500</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <h2 class="section-title">Productos más vendidos</h2>
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Producto</th>
+                        <th>Cantidad Vendida</th>
+                        <th>Ingresos Generados</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>vape</td>
+                        <td class="price">50</td>
+                        <td class="price">$5,000</td>
+                    </tr>
+                    <tr>
+                        <td>hooka</td>
+                        <td class="price">40</td>
+                        <td class="price">$2,000</td>
+                    </tr>
+                    <tr>
+                        <td>liquidos</td>
+                        <td class="price">30</td>
+                        <td class="price">$7,500</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 </div>
+
+@code {
+    [Inject] private SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
+
+    private async Task Logout()
+    {
+        // Cierra sesión del usuario actual
+        await SignInManager.SignOutAsync();
+
+        // Redirige al login
+        NavigationManager.NavigateTo("/Account/Login", forceLoad: true);
+    }
+}
