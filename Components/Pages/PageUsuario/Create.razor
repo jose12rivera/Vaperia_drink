@@ -1,0 +1,87 @@
+﻿@page "/Usuarios/Create"
+@using Vaperia_drink.Models
+@using Vaperia_drink.Services
+@inject UsuarioService usuarioService
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+@rendermode InteractiveServer
+
+<PageTitle>Registrar Usuario</PageTitle>
+
+<EditForm Model="usuario" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="container mt-5">
+        <div class="card shadow-lg border-0">
+            <div class="card-header" style="background-color: #008DD9; color: #fff;">
+                <h3>Nuevo Usuario</h3>
+            </div>
+
+            <div class="card-body bg-light">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label><strong>Nombre completo:</strong></label>
+                        <InputText @bind-Value="usuario.NombreCompleto" class="form-control" />
+                        <ValidationMessage For="@(() => usuario.NombreCompleto)" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label><strong>Email:</strong></label>
+                        <InputText @bind-Value="usuario.Email" class="form-control" />
+                        <ValidationMessage For="@(() => usuario.Email)" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label><strong>Contraseña:</strong></label>
+                        <InputText @bind-Value="usuario.Contrasena" type="password" class="form-control" />
+                        <ValidationMessage For="@(() => usuario.Contrasena)" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label><strong>Rol:</strong></label>
+                        <InputSelect @bind-Value="usuario.Rol" class="form-select">
+                            <option value="vendedor">Vendedor</option>
+                            <option value="admin">Admin</option>
+                        </InputSelect>
+                        <ValidationMessage For="@(() => usuario.Rol)" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label><strong>Foto (URL):</strong></label>
+                        <InputText @bind-Value="usuario.FotoUrl" class="form-control" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer bg-light text-center">
+                <button type="submit" class="btn btn-outline-success me-2">
+                    <i class="bi bi-save me-2"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-outline-danger" @onclick="Volver">
+                    <i class="bi bi-arrow-left-circle-fill me-2"></i> Volver
+                </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private Usuarios usuario = new();
+
+    private async Task Guardar()
+    {
+        var ok = await usuarioService.Guardar(usuario);
+        if (ok)
+        {
+            toastService.Notify(new ToastMessage(ToastType.Success, "Guardado Exitoso", "Usuario registrado."));
+            await Task.Delay(1500);
+            navigationManager.NavigateTo("/Usuarios/Index");
+        }
+        else
+        {
+            toastService.Notify(new ToastMessage(ToastType.Danger, "Error", "No se pudo registrar el usuario."));
+        }
+    }
+
+    private void Volver() => navigationManager.NavigateTo("/Usuarios/Index");
+}
