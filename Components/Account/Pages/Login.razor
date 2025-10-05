@@ -5,7 +5,7 @@
 @inject NavigationManager NavigationManager
 @inject IdentityRedirectManager RedirectManager
 
-<PageTitle>Inicio de Sesión</PageTitle>
+<PageTitle>Inicio de Sesi&oacute;n</PageTitle>
 
 <div class="login-container">
     <div class="login-box">
@@ -82,6 +82,7 @@
     {
         if (HttpMethods.IsGet(HttpContext.Request.Method))
         {
+            // Limpiar la cookie externa para un login limpio
             await HttpContext.SignOutAsync(IdentityConstants.ExternalScheme);
         }
     }
@@ -93,6 +94,17 @@
         {
             Logger.LogInformation("Usuario logueado.");
             RedirectManager.RedirectTo("/Menu");
+        }
+        else if (result.RequiresTwoFactor)
+        {
+            RedirectManager.RedirectTo(
+                "Account/LoginWith2f",
+                new() { ["returnUrl"] = ReturnUrl, ["rememberMe"] = Input.RememberMe });
+        }
+        else if (result.IsLockedOut)
+        {
+            Logger.LogWarning("Cuenta de usuario bloqueada.");
+            RedirectManager.RedirectTo("Account/Lockout");
         }
         else
         {
@@ -110,6 +122,7 @@
         [DataType(DataType.Password)]
         public string Password { get; set; } = "";
 
+        [Display(Name = "¿Recordarme?")]
         public bool RememberMe { get; set; }
     }
 }
