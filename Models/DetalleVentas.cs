@@ -1,23 +1,37 @@
-﻿namespace Vaperia_drink.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Vaperia_drink.Models;
+
+public class DetalleVentas
 {
-    public class DetalleVentas
-    {
-        public int DetalleVentaId { get; set; }
+    [Key]
+    public int DetalleVentaId { get; set; }
 
-        // FK Venta
-        public int VentaId { get; set; }
-        public Ventas Venta { get; set; } = default!;
+    // FK Venta
+    public int VentaId { get; set; }
+    [ForeignKey("VentaId ")]
+    public Ventas Venta { get; set; } = default!;
 
-        // FK Producto
-        public int ProductoId { get; set; }
-        public Productos Producto { get; set; } = default!;
+    // FK Producto
+    public int ProductoId { get; set; }
+    [ForeignKey("ProductoId")]
+    public Productos Producto { get; set; } = default!;
 
-        public int Cantidad { get; set; }
-        public decimal PrecioUnitario { get; set; }
-        public decimal SubTotal { get; set; }
+    [Required(ErrorMessage = "La cantidad es obligatoria.")]
+    [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser mayor que 0.")]
+    public int Cantidad { get; set; }
 
-        // FK Usuario (quien registró el detalle)
-        public int UsuarioId { get; set; }
-        public Usuarios Usuario { get; set; } = default!;
-    }
+    [Required(ErrorMessage = "El precio unitario es obligatorio.")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "El precio unitario debe ser mayor que 0.")]
+    public decimal PrecioUnitario { get; set; }
+
+    [Required(ErrorMessage = "El subtotal es obligatorio.")]
+    [Range(0.01, double.MaxValue, ErrorMessage = "El subtotal debe ser mayor que 0.")]
+    public decimal SubTotal { get; set; }
+
+    // FK Usuario (quien registró el detalle)
+    public int UsuarioId { get; set; }
+    [ForeignKey("UsuarioId")]
+    public Usuarios Usuario { get; set; } = default!;
 }
