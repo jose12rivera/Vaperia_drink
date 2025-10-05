@@ -1,0 +1,119 @@
+﻿@page "/Usuarios/Index"
+@using Vaperia_drink.Models
+@using Vaperia_drink.Services
+@inject UsuarioService usuarioService
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Gestión de Usuarios</PageTitle>
+
+<div class="container-fluid vh-100 d-flex flex-column justify-content-center p-3">
+    <div class="card shadow-lg w-100 h-100">
+        <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #008DD9; color: #fff;">
+            <h3 class="m-0">Usuarios</h3>
+            <a href="/Usuarios/Create" class="btn btn-light btn-sm">
+                <i class="bi bi-plus-circle me-2"></i> Nuevo Usuario
+            </a>
+        </div>
+
+        <div class="card-body overflow-auto bg-light">
+            <div class="row mb-4 align-items-end">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input @bind="valorBusqueda" @bind:event="oninput" class="form-control" placeholder="Buscar por nombre o rol..." />
+                        <button @onclick="Buscar" class="btn btn-outline-primary" type="button">
+                            <i class="bi bi-search me-2"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            @if (listaUsuarios.Any())
+            {
+                <table class="table table-striped table-hover align-middle">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Foto</th>
+                            <th>ID</th>
+                            <th>Nombre</th>
+                            <th>Email</th>
+                            <th>Rol</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var u in listaUsuarios)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(u.FotoUrl))
+                                    {
+                                        <img src="@u.FotoUrl" alt="Foto Usuario" class="img-thumbnail" style="width:50px; height:50px; object-fit:cover;" />
+                                    }
+                                    else
+                                    {
+                                        <div class="bg-secondary text-white text-center" style="width:50px; height:50px; line-height:50px; border-radius:5px;">
+                                            <i class="bi bi-person"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td>@u.UsuarioId</td>
+                                <td>@u.NombreCompleto</td>
+                                <td>@u.Email</td>
+                                <td>@u.Rol</td>
+                                <td>
+                                    <div class="btn-group">
+                                        <a href="/Usuarios/Details/@u.UsuarioId" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="/Usuarios/Edit/@u.UsuarioId" class="btn btn-outline-success btn-sm">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="/Usuarios/Delete/@u.UsuarioId" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle me-2"></i> No se encontraron usuarios.
+                </div>
+            }
+        </div>
+
+        <div class="card-footer bg-light d-flex justify-content-between">
+            <p class="mb-0"><strong>Total de usuarios: @listaUsuarios.Count</strong></p>
+            <button class="btn btn-outline-secondary" @onclick="Volver">
+                <i class="bi bi-arrow-left me-2"></i> Volver al Dashboard
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Usuarios> listaUsuarios = new();
+    private string valorBusqueda = "";
+
+    protected override async Task OnInitializedAsync() => listaUsuarios = await usuarioService.ListarUsuarios();
+
+    private async Task Buscar()
+    {
+        string busqueda = valorBusqueda?.Trim().ToLower() ?? "";
+
+        if (string.IsNullOrWhiteSpace(busqueda))
+            listaUsuarios = await usuarioService.ListarUsuarios();
+        else
+            listaUsuarios = await usuarioService.Listar(u =>
+                u.NombreCompleto.ToLower().Contains(busqueda) ||
+                u.Rol.ToLower().Contains(busqueda)
+            );
+    }
+
+    private void Volver() => navigationManager.NavigateTo("/Dashboard");
+}
