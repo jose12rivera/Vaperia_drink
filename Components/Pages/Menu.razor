@@ -1,7 +1,9 @@
 ﻿@page "/Dashboard"
+
 @using Microsoft.AspNetCore.Identity
 @using Vaperia_drink.Data
-
+@inject NavigationManager NavigationManager
+@inject SignInManager<ApplicationUser> SignInManager
 
 <link rel="stylesheet" href="dashboard.css">
 
@@ -14,12 +16,13 @@
                 </svg>
                 Inicio/Dashboard
             </li>
-            <li style="cursor:pointer;" @onclick="() => NavigateToProductos()">
-                <svg fill="currentColor" viewBox="0 0 20 20">
-                    <path d="M5 3a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2V5a2 2 0 00-2-2H5zM5 11a2 2 0 00-2 2v2a2 2 0 002 2h2a2 2 0 002-2v-2a2 2 0 00-2-2H5zM11 5a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V5zM11 13a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
-                Productos
+            <li>
+                <a href="/Productos/Index" style="text-decoration:none; color:inherit; display:flex; align-items:center; gap:15px;">
+                    <svg fill="currentColor" viewBox="0 0 20 20">...</svg>
+                    Productos
+                </a>
             </li>
+
 
             <li>
                 <svg fill="currentColor" viewBox="0 0 20 20">
@@ -71,7 +74,6 @@
             </svg>
             Cerrar Sesión
         </div>
-
     </div>
 
     <div class="main-content">
@@ -155,19 +157,15 @@
 </div>
 
 @code {
-    [Inject] private SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
-    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
-
     private void NavigateToProductos()
     {
         NavigationManager.NavigateTo("/Productos/Index");
     }
+
+
     private async Task Logout()
     {
-        // Cierra sesión del usuario actual
         await SignInManager.SignOutAsync();
-
-        // Redirige al login
         NavigationManager.NavigateTo("/Account/Login", forceLoad: true);
     }
 }
