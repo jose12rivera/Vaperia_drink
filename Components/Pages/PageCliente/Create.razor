@@ -1,0 +1,67 @@
+﻿@page "/Clientes/Create"
+@using Vaperia_drink.Models
+@using Vaperia_drink.Services
+@inject ClienteService clienteService
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+@rendermode InteractiveServer
+
+<PageTitle>Registrar Cliente</PageTitle>
+
+<EditForm Model="cliente" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="container mt-5">
+        <div class="card shadow-lg border-0">
+            <div class="card-header" style="background-color: #008DD9; color: #fff;">
+                <h3>Nuevo Cliente</h3>
+            </div>
+
+            <div class="card-body bg-light">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label><strong>Teléfono:</strong></label>
+                        <InputText @bind-Value="cliente.Telefono" class="form-control" />
+                        <ValidationMessage For="@(() => cliente.Telefono)" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label><strong>Nombre:</strong></label>
+                        <InputText @bind-Value="cliente.Nombre" class="form-control" />
+                        <ValidationMessage For="@(() => cliente.Nombre)" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer bg-light text-center">
+                <button type="submit" class="btn btn-outline-success me-2">
+                    <i class="bi bi-save me-2"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-outline-danger" @onclick="Volver">
+                    <i class="bi bi-arrow-left-circle-fill me-2"></i> Volver
+                </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private Clientes cliente = new();
+
+    private async Task Guardar()
+    {
+        var ok = await clienteService.Guardar(cliente);
+        if (ok)
+        {
+            toastService.Notify(new ToastMessage(ToastType.Success, "Guardado Exitoso", "Cliente registrado."));
+            await Task.Delay(1500);
+            navigationManager.NavigateTo("/Clientes/Index");
+        }
+        else
+        {
+            toastService.Notify(new ToastMessage(ToastType.Danger, "Error", "No se pudo registrar el cliente."));
+        }
+    }
+
+    private void Volver() => navigationManager.NavigateTo("/Clientes/Index");
+}
