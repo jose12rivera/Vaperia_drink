@@ -7,7 +7,6 @@
 @using Microsoft.AspNetCore.WebUtilities
 @using Vaperia_drink.Data
 
-
 @inject UserManager<ApplicationUser> UserManager
 @inject IUserStore<ApplicationUser> UserStore
 @inject SignInManager<ApplicationUser> SignInManager
@@ -18,40 +17,43 @@
 
 <PageTitle>Register</PageTitle>
 
-<h1>Register</h1>
+<div class="register-container">
+    <div class="register-box">
+        <img src="/vaperia.png" alt="Logo Vapería" class="login-icon" />
+        <h2>Crear cuenta</h2>
 
-<div class="row">
-    <div class="col-md-4">
-        <StatusMessage Message="@Message" />
-        <EditForm Model="Input" asp-route-returnUrl="@ReturnUrl" method="post" OnValidSubmit="RegisterUser" FormName="register">
+        @if (!string.IsNullOrEmpty(Message))
+        {
+            <div class="alert-danger">@Message</div>
+        }
+
+        <EditForm Model="Input" OnValidSubmit="RegisterUser" FormName="register">
             <DataAnnotationsValidator />
-            <h2>Create a new account.</h2>
-            <hr />
-            <ValidationSummary class="text-danger" role="alert" />
-            <div class="form-floating mb-3">
-                <InputText @bind-Value="Input.Email" class="form-control" autocomplete="username" aria-required="true" placeholder="name@example.com" />
-                <label for="email">Email</label>
+
+            <div class="form-group">
+                <label class="form-label">Email</label>
+                <InputText @bind-Value="Input.Email" class="form-control" placeholder="Correo electrónico" autocomplete="username" />
                 <ValidationMessage For="() => Input.Email" class="text-danger" />
             </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.Password" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="password">Password</label>
+
+            <div class="form-group">
+                <label class="form-label">Password</label>
+                <InputText type="password" @bind-Value="Input.Password" class="form-control" placeholder="Contraseña" autocomplete="new-password" />
                 <ValidationMessage For="() => Input.Password" class="text-danger" />
             </div>
-            <div class="form-floating mb-3">
-                <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" autocomplete="new-password" aria-required="true" placeholder="password" />
-                <label for="confirm-password">Confirm Password</label>
+
+            <div class="form-group">
+                <label class="form-label">Confirm Password</label>
+                <InputText type="password" @bind-Value="Input.ConfirmPassword" class="form-control" placeholder="Confirmar contraseña" autocomplete="new-password" />
                 <ValidationMessage For="() => Input.ConfirmPassword" class="text-danger" />
             </div>
-            <button type="submit" class="w-100 btn btn-lg btn-primary">Register</button>
+
+            <button type="submit" class="btn-submit">Register</button>
+
+            <div class="links">
+                <a href="/Account/Login">¿Ya tienes una cuenta? Iniciar sesión</a>
+            </div>
         </EditForm>
-    </div>
-    <div class="col-md-6 col-md-offset-2">
-        <section>
-            <h3>Use another service to register.</h3>
-            <hr />
-            <ExternalLoginPicker />
-        </section>
     </div>
 </div>
 
@@ -69,7 +71,6 @@
     public async Task RegisterUser(EditContext editContext)
     {
         var user = CreateUser();
-
         await UserStore.SetUserNameAsync(user, Input.Email, CancellationToken.None);
         var emailStore = GetEmailStore();
         await emailStore.SetEmailAsync(user, Input.Email, CancellationToken.None);
@@ -97,6 +98,7 @@
             RedirectManager.RedirectTo(
                 "Account/RegisterConfirmation",
                 new() { ["email"] = Input.Email, ["returnUrl"] = ReturnUrl });
+            return;
         }
 
         await SignInManager.SignInAsync(user, isPersistent: false);
@@ -111,8 +113,7 @@
         }
         catch
         {
-            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. " +
-                $"Ensure that '{nameof(ApplicationUser)}' is not an abstract class and has a parameterless constructor.");
+            throw new InvalidOperationException($"Can't create an instance of '{nameof(ApplicationUser)}'. Ensure that it has a parameterless constructor.");
         }
     }
 
@@ -133,14 +134,14 @@
         public string Email { get; set; } = "";
 
         [Required]
-        [StringLength(100, ErrorMessage = "The {0} must be at least {2} and at max {1} characters long.", MinimumLength = 6)]
+        [StringLength(100, ErrorMessage = "La {0} debe tener al menos {2} y máximo {1} caracteres.", MinimumLength = 6)]
         [DataType(DataType.Password)]
         [Display(Name = "Password")]
         public string Password { get; set; } = "";
 
         [DataType(DataType.Password)]
         [Display(Name = "Confirm password")]
-        [Compare("Password", ErrorMessage = "The password and confirmation password do not match.")]
+        [Compare("Password", ErrorMessage = "La contraseña y la confirmación no coinciden.")]
         public string ConfirmPassword { get; set; } = "";
     }
 }
