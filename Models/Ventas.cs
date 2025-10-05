@@ -1,22 +1,30 @@
-﻿namespace Vaperia_drink.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Vaperia_drink.Models;
+
+public class Ventas
 {
-    public class Ventas
-    {
-        public int VentaId { get; set; }
-        public DateTime Fecha { get; set; } = DateTime.Now;
+    [Key]
+    public int VentaId { get; set; }
+    [Required(ErrorMessage = "La fecha de la venta es obligatoria.")]
+    public DateTime Fecha { get; set; } = DateTime.Now;
 
-        // FK Cliente
-        public int ClienteId { get; set; }
-        public Clientes Cliente { get; set; } = default!;
+    // FK Cliente
+    public int ClienteId { get; set; }
+    [ForeignKey("ClienteId")]
+    public Clientes Cliente { get; set; } = default!;
 
-        // FK Usuario
-        public int UsuarioId { get; set; }
-        public Usuarios Usuario { get; set; } = default!;
+    // FK Usuario
+    public int UsuarioId { get; set; }
+    [ForeignKey("UsuarioId")]
+    public Usuarios Usuario { get; set; } = default!;
 
-        public decimal Total { get; set; }
+    [Required(ErrorMessage = "El total es obligatorio.")]
+    [Range(0.0, double.MaxValue, ErrorMessage = "El total no puede ser negativo.")]
+    public decimal Total { get; set; }
 
-        // Relaciones
-        public ICollection<DetalleVentas> Detalles { get; set; } = new List<DetalleVentas>();
-        public ICollection<Facturas> Facturas { get; set; } = new List<Facturas>();
-    }
+    // Relaciones
+    public ICollection<DetalleVentas> Detalles { get; set; } = new List<DetalleVentas>();
+    public ICollection<Facturas> Facturas { get; set; } = new List<Facturas>();
 }
