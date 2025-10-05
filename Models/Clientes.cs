@@ -1,15 +1,28 @@
-﻿namespace Vaperia_drink.Models
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
+
+namespace Vaperia_drink.Models;
+
+public class Clientes
 {
-    public class Clientes
-    {
-        public int ClienteId { get; set; }
-        public DateTime FechaRegistro { get; set; } = DateTime.Now;
-        public string Telefono { get; set; } = string.Empty;
-        public string Email { get; set; } = string.Empty;
+    [Key]
+    public int ClienteId { get; set; }
 
-        // Relaciones
-        public ICollection<Ventas> Ventas { get; set; } = new List<Ventas>();
-        public ICollection<Facturas> Facturas { get; set; } = new List<Facturas>();
+    [Required(ErrorMessage = "La fecha de registro es obligatoria.")]
+    public DateTime FechaRegistro { get; set; } = DateTime.Now;
 
-    }
+    [Required(ErrorMessage = "El teléfono es obligatorio.")]
+    [Phone(ErrorMessage = "El teléfono no tiene un formato válido.")]
+    [StringLength(20, ErrorMessage = "El teléfono no puede tener más de 20 caracteres.")]
+    public string Telefono { get; set; } = string.Empty;
+
+    [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
+    [EmailAddress(ErrorMessage = "El correo electrónico no es válido.")]
+    [StringLength(100, ErrorMessage = "El correo electrónico no puede tener más de 100 caracteres.")]
+    public string Email { get; set; } = string.Empty;
+
+    // Relaciones
+    public ICollection<Ventas> Ventas { get; set; } = new List<Ventas>();
+    public ICollection<Facturas> Facturas { get; set; } = new List<Facturas>();
 }
