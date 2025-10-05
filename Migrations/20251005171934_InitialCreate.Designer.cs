@@ -11,7 +11,7 @@ using Vaperia_drink.Data;
 namespace Vaperia_drink.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20251005162801_InitialCreate")]
+    [Migration("20251005171934_InitialCreate")]
     partial class InitialCreate
     {
         /// <inheritdoc />
@@ -218,12 +218,12 @@ namespace Vaperia_drink.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("Email")
-                        .IsRequired()
-                        .HasMaxLength(100)
+                    b.Property<DateTime>("FechaRegistro")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("FechaRegistro")
+                    b.Property<string>("Nombre")
+                        .IsRequired()
+                        .HasMaxLength(100)
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Telefono")

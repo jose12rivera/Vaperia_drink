@@ -58,7 +58,7 @@ namespace Vaperia_drink.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     FechaRegistro = table.Column<DateTime>(type: "TEXT", nullable: false),
                     Telefono = table.Column<string>(type: "TEXT", maxLength: 20, nullable: false),
-                    Email = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false)
+                    Nombre = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false)
                 },
                 constraints: table =>
                 {
