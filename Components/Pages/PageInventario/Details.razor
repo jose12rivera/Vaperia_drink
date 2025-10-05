@@ -1,0 +1,108 @@
+﻿@page "/Inventario/Details/{InventarioId:int}"
+@inject InventarioService inventarioService
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Detalle del Movimiento</PageTitle>
+
+<div class="container mt-5 pt-3">
+    <div class="card shadow-lg border-0">
+        <div class="card-header text-center py-4" style="background-color: #008DD9; color: #fff;">
+            <h2>Detalle del Movimiento de Inventario</h2>
+        </div>
+
+        <div class="card-body">
+            @if (inventario != null)
+            {
+                <div class="row">
+                    <!-- Información del Movimiento -->
+                    <div class="col-md-8">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>ID Movimiento:</strong>
+                                <p>@inventario.InventarioId</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Producto:</strong>
+                                <p>@inventario.Producto?.Nombre</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Tipo de Movimiento:</strong>
+                                <p>
+                                    @if (inventario.TipoMovimiento == "Entrada")
+                                    {
+                                        <span class="badge bg-success">Entrada</span>
+                                    }
+                                    else
+                                    {
+                                        <span class="badge bg-danger">Salida</span>
+                                    }
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Cantidad:</strong>
+                                <p>@inventario.Cantidad unidades</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Fecha:</strong>
+                                <p>@inventario.FechaMovimiento.ToString("dd/MM/yyyy HH:mm")</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Imagen del producto -->
+                    <div class="col-md-4 text-center">
+                        @if (!string.IsNullOrEmpty(inventario.Producto?.FotoUrl))
+                        {
+                            <img src="@inventario.Producto.FotoUrl" alt="@inventario.Producto.Nombre" class="img-fluid rounded shadow" style="max-height: 250px;" />
+                        }
+                        else
+                        {
+                            <div class="d-flex align-items-center justify-content-center bg-light rounded" style="height: 200px;">
+                                <i class="bi bi-box-seam text-secondary" style="font-size: 4rem;"></i>
+                            </div>
+                            <p class="text-muted mt-2">Sin imagen</p>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger text-center">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    No se encontró el movimiento solicitado.
+                </div>
+            }
+        </div>
+
+        <div class="card-footer text-center bg-light">
+            <button class="btn btn-primary" @onclick="Volver">
+                <i class="bi bi-arrow-left-circle-fill me-2"></i>
+                Volver a la Lista
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int InventarioId { get; set; }
+
+    private Inventarios? inventario;
+
+    protected override async Task OnInitializedAsync()
+    {
+        inventario = await inventarioService.Buscar(InventarioId);
+    }
+
+    private void Volver()
+    {
+        navigationManager.NavigateTo("/Inventario/Index");
+    }
+}
