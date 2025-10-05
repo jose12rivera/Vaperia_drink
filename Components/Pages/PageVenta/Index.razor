@@ -1,6 +1,7 @@
 ﻿@page "/Ventas/Index"
 @using Vaperia_drink.Models
 @inject ProductoService productosService
+@inject InventarioService inventarioService
 @inject VentasService ventasService
 @inject ClienteService clientesService
 @inject NavigationManager Navigation
@@ -502,7 +503,7 @@
 
             <div class="search-bar">
                 <span class="search-icon">🔍</span>
-                <input type="text" placeholder="Buscar productos" @bind="searchText" @bind:event="oninput" />
+                <input type="text" placeholder="Buscar productos en inventario" @bind="searchText" @bind:event="oninput" />
             </div>
 
             <div class="category-tabs">
@@ -521,40 +522,45 @@
 
             @if (isLoading)
             {
-                <div class="loading">Cargando productos...</div>
+                <div class="loading">Cargando inventario...</div>
             }
-            else if (productosFiltrados.Any())
+            else if (inventarioFiltrado.Any())
             {
                 <div class="products-grid">
-                    @foreach (var producto in productosFiltrados)
+                    @foreach (var item in inventarioFiltrado)
                     {
-                        <div class="product-card @(producto.Stock == 0 ? "out-of-stock" : "")"
-                             @onclick="() => AgregarAlCarrito(producto)">
+                        var stockProducto = stockActual.ContainsKey(item.ProductoId) ? stockActual[item.ProductoId] : 0;
+                        <div class="product-card @(stockProducto == 0 ? "out-of-stock" : "")"
+                             @onclick="() => AgregarAlCarrito(item.Producto, stockProducto)">
                             <div class="product-image">
-                                @if (!string.IsNullOrEmpty(producto.FotoUrl))
+                                @if (!string.IsNullOrEmpty(item.Producto.FotoUrl))
                                 {
-                                    <img src="@producto.FotoUrl" alt="@producto.Nombre" />
+                                    <img src="@item.Producto.FotoUrl" alt="@item.Producto.Nombre" />
                                 }
-                                else if (producto.Foto != null)
+                                else if (item.Producto.Foto != null)
                                 {
-                                    <img src="@($"data:image/jpeg;base64,{Convert.ToBase64String(producto.Foto)}")" alt="@producto.Nombre" />
+                                    <img src="@($"data:image/jpeg;base64,{Convert.ToBase64String(item.Producto.Foto)}")" alt="@item.Producto.Nombre" />
                                 }
                                 else
                                 {
                                     <span style="color: white; font-size: 3rem;">📦</span>
                                 }
                             </div>
-                            @if (producto.Stock == 0)
+                            @if (stockProducto == 0)
                             {
                                 <span class="stock-badge out">Agotado</span>
                             }
-                            else if (producto.Stock <= 5)
+                            else if (stockProducto <= 5)
                             {
-                                <span class="stock-badge low">Stock: @producto.Stock</span>
+                                <span class="stock-badge low">Stock: @stockProducto</span>
                             }
                             <div class="product-info">
-                                <h3>@producto.Nombre</h3>
-                                <p class="price">$@producto.Precio.ToString("N2")</p>
+                                <h3>@item.Producto.Nombre</h3>
+                                <p class="price">$@item.Producto.Precio.ToString("N2")</p>
+                                <div class="inventory-info">
+                                    <small>Último movimiento: @item.FechaMovimiento.ToString("dd/MM/yyyy")</small>
+                                    <small>Tipo: @item.TipoMovimiento</small>
+                                </div>
                             </div>
                         </div>
                     }
@@ -562,7 +568,7 @@
             }
             else
             {
-                <div class="loading">No se encontraron productos</div>
+                <div class="loading">No se encontraron productos en inventario</div>
             }
         </div>
 
@@ -601,7 +607,7 @@
                                     <span class="quantity">@item.Cantidad</span>
                                     <button class="qty-btn"
                                             @onclick="() => AumentarCantidad(item)"
-                                            disabled="@(item.Cantidad >= item.Producto.Stock)">
+                                            disabled="@(item.Cantidad >= item.StockDisponible)">
                                         +
                                     </button>
                                 </div>
@@ -672,9 +678,10 @@
     private string searchText = "";
     private string selectedCategory = "Todos";
     private List<string> categorias = new();
-    private List<Productos> productos = new();
+    private List<Inventarios> inventario = new();
     private List<CarritoItemViewModel> carritoItems = new();
     private List<Clientes> clientes = new();
+    private Dictionary<int, int> stockActual = new();
     private int clienteSeleccionadoId = 0;
     private string metodoPagoSeleccionado = "";
     private int usuarioActualId = 1;
@@ -689,26 +696,32 @@
         public Productos Producto { get; set; } = default!;
         public int Cantidad { get; set; }
         public decimal PrecioUnitario { get; set; }
+        public int StockDisponible { get; set; }
         public decimal SubTotal => Cantidad * PrecioUnitario;
     }
 
     // Propiedades calculadas
-    private List<Productos> productosFiltrados
+    private List<Inventarios> inventarioFiltrado
     {
         get
         {
-            var filtrados = productos.AsEnumerable();
+            var productosUnicos = inventario
+                .GroupBy(i => i.ProductoId)
+                .Select(g => g.OrderByDescending(i => i.FechaMovimiento).First())
+                .ToList();
+
+            var filtrados = productosUnicos.AsEnumerable();
 
             if (selectedCategory != "Todos")
             {
-                filtrados = filtrados.Where(p => p.Categoria == selectedCategory);
+                filtrados = filtrados.Where(i => i.Producto.Categoria == selectedCategory);
             }
 
             if (!string.IsNullOrWhiteSpace(searchText))
             {
-                filtrados = filtrados.Where(p =>
-                    p.Nombre.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
-                    p.Categoria.Contains(searchText, StringComparison.OrdinalIgnoreCase));
+                filtrados = filtrados.Where(i =>
+                    i.Producto.Nombre.Contains(searchText, StringComparison.OrdinalIgnoreCase) ||
+                    i.Producto.Categoria.Contains(searchText, StringComparison.OrdinalIgnoreCase));
             }
 
             return filtrados.ToList();
@@ -731,17 +744,20 @@
             isLoading = true;
             errorMessage = null;
 
-            // Cargar productos - el servicio retorna directamente List<Productos>
-            productos = await productosService.Listar(p => p.Stock >= 0);
+            // Cargar inventario con productos
+            inventario = await inventarioService.ListarConProductos(i => true);
 
-            // Extraer categorías únicas
-            categorias = productos
-                .Select(p => p.Categoria)
+            // Calcular stock actual
+            stockActual = await inventarioService.ObtenerStockActual();
+
+            // Extraer categorías únicas de los productos en inventario
+            categorias = inventario
+                .Select(i => i.Producto.Categoria)
                 .Distinct()
                 .OrderBy(c => c)
                 .ToList();
 
-            // Cargar clientes - el servicio retorna directamente List<Clientes>
+            // Cargar clientes
             clientes = await clientesService.Listar(c => true);
         }
         catch (Exception ex)
@@ -754,9 +770,9 @@
         }
     }
 
-    private void AgregarAlCarrito(Productos producto)
+    private void AgregarAlCarrito(Productos producto, int stockDisponible)
     {
-        if (producto.Stock == 0)
+        if (stockDisponible == 0)
         {
             return;
         }
@@ -765,7 +781,7 @@
 
         if (itemExistente != null)
         {
-            if (itemExistente.Cantidad < producto.Stock)
+            if (itemExistente.Cantidad < stockDisponible)
             {
                 itemExistente.Cantidad++;
             }
@@ -776,7 +792,8 @@
                 {
                     Producto = producto,
                     Cantidad = 1,
-                    PrecioUnitario = producto.Precio
+                    PrecioUnitario = producto.Precio,
+                    StockDisponible = stockDisponible
                 });
         }
 
@@ -785,7 +802,7 @@
 
     private void AumentarCantidad(CarritoItemViewModel item)
     {
-        if (item.Cantidad < item.Producto.Stock)
+        if (item.Cantidad < item.StockDisponible)
         {
             item.Cantidad++;
         }
@@ -843,8 +860,17 @@
                     UsuarioId = usuarioActualId
                 }).ToList();
 
-            // Guardar la venta completa
-            var (success, message, ventaId) = await ventasService.GuardarVentaCompleta(venta, detalles);
+            // Registrar movimientos de inventario (salidas)
+            var movimientosInventario = carritoItems.Select(item => new Inventarios
+                {
+                    ProductoId = item.Producto.ProductoId,
+                    Cantidad = item.Cantidad,
+                    TipoMovimiento = "Salida",
+                    FechaMovimiento = DateTime.Now
+                }).ToList();
+
+            // Guardar la venta completa y los movimientos de inventario
+            var (success, message, ventaId) = await ventasService.GuardarVentaCompletaConInventario(venta, detalles, movimientosInventario);
 
             if (success)
             {
@@ -855,7 +881,7 @@
                 clienteSeleccionadoId = 0;
                 metodoPagoSeleccionado = "";
 
-                // Recargar productos para actualizar stock
+                // Recargar inventario para actualizar stock
                 await CargarDatos();
 
                 // Mostrar mensaje por 3 segundos
