@@ -17,22 +17,22 @@
         </div>
 
         <div class="card-body overflow-auto bg-light">
-            <!-- Barra de búsqueda -->
+            <!-- 🔍 Barra de búsqueda -->
             <div class="row mb-4 align-items-end">
                 <div class="col-md-6">
                     <div class="input-group">
-                        <input @bind="valorBusqueda" class="form-control" placeholder="Buscar por nombre o categoría" />
+                        <input @bind="valorBusqueda"
+                               @bind:event="oninput"
+                               class="form-control"
+                               placeholder="Buscar por nombre, categoría o precio" />
                         <button @onclick="Buscar" class="btn btn-outline-primary" type="button">
                             <i class="bi bi-search me-2"></i> Buscar
                         </button>
                     </div>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label"><strong>Todas las Categorías</strong></label>
-                </div>
             </div>
 
-            <!-- Tabla de productos -->
+            <!-- 🧾 Tabla de productos -->
             @if (listaProductos.Any())
             {
                 <table class="table table-striped table-hover">
@@ -53,11 +53,15 @@
                                 <td>
                                     @if (!string.IsNullOrEmpty(producto.FotoUrl))
                                     {
-                                        <img src="@producto.FotoUrl" alt="@producto.Nombre" style="width: 50px; height: 50px; object-fit: cover;" class="rounded" />
+                                        <img src="@producto.FotoUrl" alt="@producto.Nombre"
+                                             style="width: 50px; height: 50px; object-fit: cover;"
+                                             class="rounded" />
                                     }
                                     else
                                     {
-                                        <div style="width: 50px; height: 50px; background-color: #e9ecef; display: flex; align-items: center; justify-content: center;" class="rounded">
+                                        <div style="width: 50px; height: 50px; background-color: #e9ecef;
+                                                    display: flex; align-items: center; justify-content: center;"
+                                             class="rounded">
                                             <i class="bi bi-image text-secondary"></i>
                                         </div>
                                     }
@@ -102,7 +106,7 @@
 </div>
 
 @code {
-    private List<Productos> listaProductos = new List<Productos>();
+    private List<Productos> listaProductos = new();
     private string valorBusqueda = "";
 
     protected override async Task OnInitializedAsync()
@@ -126,15 +130,19 @@
     {
         try
         {
-            if (string.IsNullOrWhiteSpace(valorBusqueda))
+            string busqueda = valorBusqueda?.Trim() ?? "";
+
+            if (string.IsNullOrWhiteSpace(busqueda))
             {
                 await CargarProductos();
             }
             else
             {
                 listaProductos = await productoService.Listar(p =>
-                    p.Nombre.Contains(valorBusqueda, StringComparison.OrdinalIgnoreCase) ||
-                    p.Categoria.Contains(valorBusqueda, StringComparison.OrdinalIgnoreCase));
+                    p.Nombre.Contains(busqueda, StringComparison.OrdinalIgnoreCase) ||
+                    p.Categoria.Contains(busqueda, StringComparison.OrdinalIgnoreCase) ||
+                    p.Precio.ToString().Contains(busqueda, StringComparison.OrdinalIgnoreCase)
+                );
             }
         }
         catch (Exception ex)
