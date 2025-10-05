@@ -1,142 +1,141 @@
 ﻿@page "/Dashboard"
 
 
-<PageTitle>Dashboard - Vapería</PageTitle>
-
-<div class="dashboard-container">
-    <div class="header">
-        <div class="logo">VAPERÍA DASHBOARD</div>
-        <div class="user-info">
-            <div>Bienvenido, Admin</div>
-            <div class="user-avatar">A</div>
-        </div>
-    </div>
-
-    <div class="main-content">
-        <div class="sidebar">
-            <div class="sidebar-title">NAVEGACIÓN</div>
-            <ul class="sidebar-menu">
-                <li class="active">Dashboard</li>
-                <li>Productos</li>
-                <li>Inventario</li>
-                <li>Ventas</li>
-                <li>Clientes</li>
-                <li>Usuarios</li>
-                <li>Facturas</li>
-                <li>Estadísticas</li>
-                <li>Mi Perfil</li>
-            </ul>
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Vapería</title>
+    <link rel="stylesheet" href="dashboard.css">
+</head>
+<body>
+    <div class="dashboard-container">
+        <div class="header">
+            <div class="logo">VAPERÍA DASHBOARD</div>
+            <div class="user-info">
+                <div>Bienvenido, Admin</div>
+                <div class="user-avatar">A</div>
+            </div>
         </div>
 
-        <div class="dashboard-content">
-            <div class="menu-title">MENÚ VAPERÍA</div>
-
-            <div class="menu-row">
-                <a href="#" class="menu-item">
-                    <img src="/ventas.png" alt="Nueva Venta" />
-                    <span>Nueva Venta</span>
-                </a>
-                <a href="#" class="menu-item">
-                    <img src="/Productos.png" alt="Productos" />
-                    <span>Productos</span>
-                </a>
-                <a href="#" class="menu-item">
-                    <img src="/Inventario.png" alt="Inventario" />
-                    <span>Inventario</span>
-                </a>
+        <div class="main-content">
+            <div class="sidebar">
+                <div class="sidebar-title">NAVEGACIÓN</div>
+                <ul class="sidebar-menu">
+                    <li class="active">
+                        <img src="/iniciar.png" alt="Dashboard" class="sidebar-icon">
+                        Dashboard
+                    </li>
+                    <li>
+                        <img src="/Productos.png" alt="Productos" class="sidebar-icon">
+                        Productos
+                    </li>
+                    <li>
+                        <img src="/Inventario.png" alt="Inventario" class="sidebar-icon">
+                        Inventario
+                    </li>
+                    <li>
+                        <img src="/ventas.png" alt="Ventas" class="sidebar-icon">
+                        Ventas
+                    </li>
+                    <li>
+                        <img src="/clientes.png" alt="Clientes" class="sidebar-icon">
+                        Clientes
+                    </li>
+                    <li>
+                        <img src="/usuario.png" alt="Usuarios" class="sidebar-icon">
+                        Usuarios
+                    </li>
+                    <li>
+                        <img src="/Facturas.png" alt="Facturas" class="sidebar-icon">
+                        Facturas
+                    </li>
+                    <li>
+                        <img src="/Estadisticas.png" alt="Estadísticas" class="sidebar-icon">
+                        Estadísticas
+                    </li>
+                    <li>
+                        <img src="/Perfil.png" alt="Mi Perfil" class="sidebar-icon">
+                        Mi Perfil
+                    </li>
+                </ul>
             </div>
 
-            <div class="menu-row">
-                <a href="#" class="menu-item">
-                    <img src="/clientes.png" alt="Clientes" />
-                    <span>Clientes</span>
-                </a>
-                <a href="#" class="menu-item">
-                    <img src="/Facturas.png" alt="Facturas" />
-                    <span>Facturas</span>
-                </a>
-                <a href="#" class="menu-item">
-                    <img src="/Estadisticas.png" alt="Estadísticas" />
-                    <span>Estadísticas</span>
-                </a>
-            </div>
 
-            <AuthorizeView Roles="admin">
-                <div class="menu-row">
-                    <a href="#" class="menu-item">
-                        <img src="/usuario.png" alt="Usuarios" />
-                        <span>Usuarios</span>
-                    </a>
-                </div>
-            </AuthorizeView>
+            <div class="dashboard-content">
+                <div class="menu-title">MENÚ VAPERÍA</div>
 
-            <div class="cards-container">
-                <div class="card">
-                    <div class="card-title">Resultado de Ventas</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Cantidad</th>
-                                <th>Precio Unitario</th>
-                                <th>Total</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Vape</td>
-                                <td>5</td>
-                                <td>$100</td>
-                                <td>$500</td>
-                            </tr>
-                            <tr>
-                                <td>Hooka</td>
-                                <td>10</td>
-                                <td>$50</td>
-                                <td>$500</td>
-                            </tr>
-                            <tr>
-                                <td>Líquidos</td>
-                                <td>2</td>
-                                <td>$250</td>
-                                <td>$500</td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="cards-container">
+                    <div class="card">
+                        <div class="card-title">Resultado de Ventas</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Unitario</th>
+                                    <th>Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Vape</td>
+                                    <td>5</td>
+                                    <td>$100</td>
+                                    <td>$500</td>
+                                </tr>
+                                <tr>
+                                    <td>Hooka</td>
+                                    <td>10</td>
+                                    <td>$50</td>
+                                    <td>$500</td>
+                                </tr>
+                                <tr>
+                                    <td>Líquidos</td>
+                                    <td>2</td>
+                                    <td>$250</td>
+                                    <td>$500</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <div class="card">
+                        <div class="card-title">Productos más vendidos</div>
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Producto</th>
+                                    <th>Cantidad Vendida</th>
+                                    <th>Ingresos Generados</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Vape</td>
+                                    <td>50</td>
+                                    <td>$5,000</td>
+                                </tr>
+                                <tr>
+                                    <td>Hooka</td>
+                                    <td>40</td>
+                                    <td>$2,000</td>
+                                </tr>
+                                <tr>
+                                    <td>Líquidos</td>
+                                    <td>30</td>
+                                    <td>$7,500</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
 
-                <div class="card">
-                    <div class="card-title">Productos más vendidos</div>
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Producto</th>
-                                <th>Cantidad Vendida</th>
-                                <th>Ingresos Generados</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>Vape</td>
-                                <td>50</td>
-                                <td>$5,000</td>
-                            </tr>
-                            <tr>
-                                <td>Hooka</td>
-                                <td>40</td>
-                                <td>$2,000</td>
-                            </tr>
-                            <tr>
-                                <td>Líquidos</td>
-                                <td>30</td>
-                                <td>$7,500</td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
             </div>
         </div>
     </div>
-</div>
+</body>
+</html>
 
 

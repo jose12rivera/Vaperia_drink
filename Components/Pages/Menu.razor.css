@@ -1,9 +1,24 @@
-﻿.dashboard-container {
-    max-width: 1200px;
-    margin: 0 auto;
+﻿/* Reset y fuentes */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+body {
+    background: linear-gradient(135deg, #1a2a3a, #0d1b2a);
+    color: #fff;
+    min-height: 100vh;
     padding: 20px;
 }
 
+.dashboard-container {
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+/* Header */
 .header {
     display: flex;
     justify-content: space-between;
@@ -11,8 +26,6 @@
     margin-bottom: 30px;
     padding: 20px 0;
     border-bottom: 2px solid rgba(255, 255, 255, 0.2);
-    color: #fff;
-    font-family: 'Poppins', sans-serif;
 }
 
 .logo {
@@ -40,7 +53,7 @@
     border: 2px solid rgba(255,255,255,0.3);
 }
 
-/* Main content grid */
+/* Main content */
 .main-content {
     display: grid;
     grid-template-columns: 1fr 3fr;
@@ -96,7 +109,6 @@
     gap: 30px;
 }
 
-/* Menu items (igual que tu ejemplo de Menu.razor) */
 .menu-title {
     color: #FFD700;
     font-size: 48px;
@@ -105,16 +117,14 @@
     text-align: center;
     text-transform: uppercase;
     letter-spacing: 3px;
-    font-family: 'Poppins', sans-serif;
     text-shadow: 2px 2px 8px rgba(0,0,0,0.8),0 0 15px rgba(255,215,0,0.7);
 }
 
+/* Menu row y items */
 .menu-row {
     display: flex;
     justify-content: center;
     gap: 30px;
-    width: 100%;
-    margin-bottom: 40px;
     flex-wrap: wrap;
 }
 
@@ -138,8 +148,8 @@
 }
 
     .menu-item img {
-        width: 100px;
-        height: 100px;
+        width: 80px;
+        height: 80px;
         margin-bottom: 15px;
         transition: transform 0.3s;
         filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3));
@@ -148,7 +158,6 @@
     .menu-item span {
         font-size: 14px;
         font-weight: 600;
-        letter-spacing: 0.5px;
     }
 
     .menu-item:hover {
@@ -164,7 +173,7 @@
 /* Cards */
 .cards-container {
     display: grid;
-    grid-template-columns: repeat(2,1fr);
+    grid-template-columns: repeat(2, 1fr);
     gap: 25px;
 }
 
@@ -222,5 +231,3 @@ th {
         align-items: center;
     }
 }
-
-</style >
