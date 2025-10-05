@@ -1,4 +1,6 @@
 ﻿@page "/Dashboard"
+@using Microsoft.AspNetCore.Identity
+
 
 <link rel="stylesheet" href="dashboard.css">
 
@@ -61,12 +63,13 @@
                 Mi Perfil
             </li>
         </ul>
-        <div class="logout">
+        <div class="logout" @onclick="Logout">
             <svg fill="currentColor" viewBox="0 0 20 20" style="width:20px;height:20px">
                 <path fill-rule="evenodd" d="M3 3a1 1 0 00-1 1v12a1 1 0 102 0V4a1 1 0 00-1-1zm10.293 9.293a1 1 0 001.414 1.414l3-3a1 1 0 000-1.414l-3-3a1 1 0 10-1.414 1.414L14.586 9H7a1 1 0 100 2h7.586l-1.293 1.293z" clip-rule="evenodd" />
             </svg>
             Cerrar Sesión
         </div>
+
     </div>
 
     <div class="main-content">
@@ -150,5 +153,15 @@
 </div>
 
 @code {
+    [Inject] private SignInManager<ApplicationUser> SignInManager { get; set; } = default!;
+    [Inject] private NavigationManager NavigationManager { get; set; } = default!;
 
+    private async Task Logout()
+    {
+        // Cierra sesión del usuario actual
+        await SignInManager.SignOutAsync();
+
+        // Redirige al login
+        NavigationManager.NavigateTo("/Account/Login", forceLoad: true);
+    }
 }
