@@ -5,34 +5,44 @@ using Vaperia_drink.Models;
 
 namespace Vaperia_drink.Services;
 
-public class UsuarioService(ApplicationDbContext contexto)
+public class UsuarioService
 {
-    public async Task<bool> Existe(int usuarioId)
+    private readonly ApplicationDbContext _contexto;
+
+    public UsuarioService(ApplicationDbContext contexto)
     {
-        return await contexto.Usuarios.AnyAsync(u => u.UsuarioId == usuarioId);
+        _contexto = contexto;
     }
 
-    public async Task<bool> Insertar(Usuarios usuario)
+    // Verificar si existe un usuario por Id
+    public async Task<bool> Existe(int usuarioId)
+    {
+        return await _contexto.Usuarios.AnyAsync(u => u.UsuarioId == usuarioId);
+    }
+
+    // Crear nuevo usuario
+    public async Task<bool> Crear(Usuarios usuario)
     {
         try
         {
-            contexto.Usuarios.Add(usuario);
-            await contexto.SaveChangesAsync();
+            _contexto.Usuarios.Add(usuario);
+            await _contexto.SaveChangesAsync();
             return true;
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error al insertar usuario: {ex.Message}");
+            Console.WriteLine($"Error al crear usuario: {ex.Message}");
             return false;
         }
     }
 
-    private async Task<bool> Modificar(Usuarios usuario)
+    // Modificar usuario existente
+    public async Task<bool> Modificar(Usuarios usuario)
     {
         try
         {
-            contexto.Usuarios.Update(usuario);
-            return await contexto.SaveChangesAsync() > 0;
+            _contexto.Usuarios.Update(usuario);
+            return await _contexto.SaveChangesAsync() > 0;
         }
         catch (Exception ex)
         {
@@ -41,19 +51,21 @@ public class UsuarioService(ApplicationDbContext contexto)
         }
     }
 
+    // Guardar usuario (decide si insertar o modificar)
     public async Task<bool> Guardar(Usuarios usuario)
     {
         if (!await Existe(usuario.UsuarioId))
-            return await Insertar(usuario);
+            return await Crear(usuario);
         else
             return await Modificar(usuario);
     }
 
+    // Eliminar usuario por Id
     public async Task<bool> Eliminar(int usuarioId)
     {
         try
         {
-            var usuario = await contexto.Usuarios
+            var usuario = await _contexto.Usuarios
                 .Include(u => u.Ventas)
                 .Include(u => u.Facturas)
                 .FirstOrDefaultAsync(u => u.UsuarioId == usuarioId);
@@ -62,13 +74,13 @@ public class UsuarioService(ApplicationDbContext contexto)
                 return false;
 
             if (usuario.Ventas.Any())
-                contexto.RemoveRange(usuario.Ventas);
+                _contexto.RemoveRange(usuario.Ventas);
 
             if (usuario.Facturas.Any())
-                contexto.RemoveRange(usuario.Facturas);
+                _contexto.RemoveRange(usuario.Facturas);
 
-            contexto.Usuarios.Remove(usuario);
-            await contexto.SaveChangesAsync();
+            _contexto.Usuarios.Remove(usuario);
+            await _contexto.SaveChangesAsync();
             return true;
         }
         catch (Exception ex)
@@ -78,17 +90,19 @@ public class UsuarioService(ApplicationDbContext contexto)
         }
     }
 
+    // Buscar usuario por Id
     public async Task<Usuarios?> Buscar(int usuarioId)
     {
-        return await contexto.Usuarios
+        return await _contexto.Usuarios
             .Include(u => u.Ventas)
             .Include(u => u.Facturas)
             .FirstOrDefaultAsync(u => u.UsuarioId == usuarioId);
     }
 
+    // Listar usuarios con filtro
     public async Task<List<Usuarios>> Listar(Expression<Func<Usuarios, bool>> criterio)
     {
-        return await contexto.Usuarios
+        return await _contexto.Usuarios
             .Where(criterio)
             .Include(u => u.Ventas)
             .Include(u => u.Facturas)
@@ -96,9 +110,10 @@ public class UsuarioService(ApplicationDbContext contexto)
             .ToListAsync();
     }
 
+    // Listar todos los usuarios
     public async Task<List<Usuarios>> ListarUsuarios()
     {
-        return await contexto.Usuarios
+        return await _contexto.Usuarios
             .AsNoTracking()
             .OrderByDescending(u => u.UsuarioId)
             .ToListAsync();

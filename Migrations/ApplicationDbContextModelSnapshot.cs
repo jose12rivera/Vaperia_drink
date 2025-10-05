@@ -145,6 +145,42 @@ namespace Vaperia_drink.Migrations
                     b.ToTable("AspNetUserTokens", (string)null);
                 });
 
+            modelBuilder.Entity("Usuarios", b =>
+                {
+                    b.Property<int>("UsuarioId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<string>("Contrasena")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Email")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<byte[]>("Foto")
+                        .HasColumnType("BLOB");
+
+                    b.Property<string>("FotoUrl")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("NombreCompleto")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Rol")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("UsuarioId");
+
+                    b.ToTable("Usuarios");
+                });
+
             modelBuilder.Entity("Vaperia_drink.Data.ApplicationUser", b =>
                 {
                     b.Property<string>("Id")
@@ -427,37 +463,6 @@ namespace Vaperia_drink.Migrations
                     b.ToTable("Productos");
                 });
 
-            modelBuilder.Entity("Vaperia_drink.Models.Usuarios", b =>
-                {
-                    b.Property<int>("UsuarioId")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<string>("Contrasena")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<byte[]>("Foto")
-                        .HasColumnType("BLOB");
-
-                    b.Property<string>("FotoUrl")
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("NombreCompleto")
-                        .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("TEXT");
-
-                    b.Property<string>("Rol")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
-
-                    b.HasKey("UsuarioId");
-
-                    b.ToTable("Usuarios");
-                });
-
             modelBuilder.Entity("Vaperia_drink.Models.Ventas", b =>
                 {
                     b.Property<int>("VentaId")
@@ -545,7 +550,7 @@ namespace Vaperia_drink.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Vaperia_drink.Models.Usuarios", "Usuario")
+                    b.HasOne("Usuarios", "Usuario")
                         .WithMany()
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -578,7 +583,7 @@ namespace Vaperia_drink.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Vaperia_drink.Models.Usuarios", "Usuario")
+                    b.HasOne("Usuarios", "Usuario")
                         .WithMany("Facturas")
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -618,7 +623,7 @@ namespace Vaperia_drink.Migrations
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("Vaperia_drink.Models.Usuarios", "Usuario")
+                    b.HasOne("Usuarios", "Usuario")
                         .WithMany("Ventas")
                         .HasForeignKey("UsuarioId")
                         .OnDelete(DeleteBehavior.Restrict)
@@ -627,6 +632,13 @@ namespace Vaperia_drink.Migrations
                     b.Navigation("Cliente");
 
                     b.Navigation("Usuario");
+                });
+
+            modelBuilder.Entity("Usuarios", b =>
+                {
+                    b.Navigation("Facturas");
+
+                    b.Navigation("Ventas");
                 });
 
             modelBuilder.Entity("Vaperia_drink.Models.Clientes", b =>
@@ -646,13 +658,6 @@ namespace Vaperia_drink.Migrations
                     b.Navigation("DetallesVenta");
 
                     b.Navigation("MovimientosInventario");
-                });
-
-            modelBuilder.Entity("Vaperia_drink.Models.Usuarios", b =>
-                {
-                    b.Navigation("Facturas");
-
-                    b.Navigation("Ventas");
                 });
 
             modelBuilder.Entity("Vaperia_drink.Models.Ventas", b =>

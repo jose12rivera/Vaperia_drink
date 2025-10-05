@@ -122,6 +122,7 @@ namespace Vaperia_drink.Migrations
                         .Annotation("Sqlite:Autoincrement", true),
                     NombreCompleto = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     Contrasena = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
+                    Email = table.Column<string>(type: "TEXT", maxLength: 100, nullable: false),
                     Rol = table.Column<string>(type: "TEXT", nullable: false),
                     FotoUrl = table.Column<string>(type: "TEXT", nullable: true),
                     Foto = table.Column<byte[]>(type: "BLOB", nullable: true)

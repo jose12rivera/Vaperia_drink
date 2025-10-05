@@ -1,8 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-
-namespace Vaperia_drink.Models;
+﻿using System.ComponentModel.DataAnnotations;
+using Vaperia_drink.Models;
 
 public class Usuarios
 {
@@ -17,9 +14,14 @@ public class Usuarios
     [StringLength(100, MinimumLength = 6, ErrorMessage = "La contraseña debe tener entre 6 y 100 caracteres.")]
     public string Contrasena { get; set; } = string.Empty;
 
+    [Required(ErrorMessage = "El correo electrónico es obligatorio.")]
+    [EmailAddress(ErrorMessage = "El correo electrónico no es válido.")]
+    [StringLength(100, ErrorMessage = "El correo no puede superar los 100 caracteres.")]
+    public string Email { get; set; } = string.Empty;
+
     [Required(ErrorMessage = "El rol es obligatorio.")]
     [RegularExpression("vendedor|admin", ErrorMessage = "El rol debe ser 'vendedor' o 'admin'.")]
-    public string Rol { get; set; } = "vendedor"; // vendedor / admin
+    public string Rol { get; set; } = "vendedor";
 
     public string? FotoUrl { get; set; }
     public byte[]? Foto { get; set; }
