@@ -1,17 +1,26 @@
-﻿namespace Vaperia_drink.Models
+﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
+
+namespace Vaperia_drink.Models;
+
+public class Inventarios
 {
-    public class Inventarios
-    {
-        public int InventarioId { get; set; }
+    [Key]
+    public int InventarioId { get; set; }
 
-        // FK Producto
-        public int ProductoId { get; set; }
-        public Productos Producto { get; set; } = default!;
+    // FK Producto
+    public int ProductoId { get; set; }
+    [ForeignKey("ProductoId")]
+    public Productos Producto { get; set; } = default!;
 
-        public DateTime FechaMovimiento { get; set; } = DateTime.Now;
-        public int Cantidad { get; set; }
+    [Required(ErrorMessage = "La fecha del movimiento es obligatoria.")]
+    public DateTime FechaMovimiento { get; set; } = DateTime.Now;
 
-        // tipoMovimiento: "Entrada", "Salida"
-        public string TipoMovimiento { get; set; } = string.Empty;
-    }
+    [Required(ErrorMessage = "La cantidad es obligatoria.")]
+    [Range(1, int.MaxValue, ErrorMessage = "La cantidad debe ser mayor que 0.")]
+    public int Cantidad { get; set; }
+
+    [Required(ErrorMessage = "El tipo de movimiento es obligatorio.")]
+    [RegularExpression("Entrada|Salida", ErrorMessage = "El tipo de movimiento debe ser 'Entrada' o 'Salida'.")]
+    public string TipoMovimiento { get; set; } = string.Empty;
 }
