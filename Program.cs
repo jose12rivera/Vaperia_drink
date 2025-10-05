@@ -6,6 +6,7 @@ using Vaperia_drink.Components.Account;
 using Vaperia_drink.Data;
 using Microsoft.AspNetCore.Identity.UI.Services;
 using Microsoft.AspNetCore.Components.Server;
+using Vaperia_drink.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,6 +35,8 @@ builder.Services.AddIdentity<ApplicationUser, IdentityRole>(options =>
 builder.Services.AddScoped<AuthenticationStateProvider, ServerAuthenticationStateProvider>();
 builder.Services.AddScoped<IdentityRedirectManager>();
 builder.Services.AddScoped<IdentityUserAccessor>();
+builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
+
 
 // 🧩 Configuración de cookies
 builder.Services.ConfigureApplicationCookie(options =>
@@ -42,9 +45,16 @@ builder.Services.ConfigureApplicationCookie(options =>
     options.LogoutPath = "/Account/Logout";
 });
 
-// 🧩 Email sender (puede ser no-op o real)
-builder.Services.AddSingleton<IEmailSender<ApplicationUser>, IdentityNoOpEmailSender>();
-
+// 🧩 Registrar servicios de la aplicación
+builder.Services.AddScoped<ClienteService>();
+builder.Services.AddScoped<DetalleVentaService>();
+builder.Services.AddScoped<EstadisticaVentaService>();
+builder.Services.AddScoped<FacturaService>();
+builder.Services.AddScoped<InventarioService>();
+builder.Services.AddScoped<MetodoPagoService>();
+builder.Services.AddScoped<ProductoService>();
+builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<VentasService>();
 // 🧩 Bootstrap para Blazor
 builder.Services.AddBlazorBootstrap();
 

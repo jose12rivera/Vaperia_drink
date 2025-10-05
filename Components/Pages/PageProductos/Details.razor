@@ -1,0 +1,120 @@
+﻿@page "/Productos/Details/{ProductoId:int}"
+@inject ProductoService productoService
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Detalle del Producto</PageTitle>
+
+<div class="container mt-5 pt-3">
+    <div class="card shadow-lg border-0">
+        <div class="card-header text-center py-4" style="background-color: #008DD9; color: #fff;">
+            <h2>Detalle del Producto</h2>
+        </div>
+
+        <div class="card-body">
+            @if (producto != null)
+            {
+                <div class="row">
+                    <!-- Foto del Producto -->
+                    <div class="col-md-4 text-center">
+                        @if (!string.IsNullOrEmpty(producto.FotoUrl))
+                        {
+                            <img src="@producto.FotoUrl" alt="@producto.Nombre" class="img-fluid rounded shadow" style="max-height: 300px;" />
+                        }
+                        else
+                        {
+                            <div class="d-flex align-items-center justify-content-center bg-light rounded" style="height: 200px;">
+                                <i class="bi bi-image text-secondary" style="font-size: 4rem;"></i>
+                            </div>
+                            <p class="text-muted mt-2">Sin imagen</p>
+                        }
+                    </div>
+
+                    <!-- Información del Producto -->
+                    <div class="col-md-8">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>ID del Producto:</strong>
+                                <p class="d-block">@producto.ProductoId</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Nombre:</strong>
+                                <p class="d-block">@producto.Nombre</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Categoría:</strong>
+                                <p class="d-block">@producto.Categoria</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Precio:</strong>
+                                <p class="d-block">@producto.Precio.ToString("C2")</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Stock Disponible:</strong>
+                                <p class="d-block">@producto.Stock unidades</p>
+                            </div>
+                        </div>
+
+                        <!-- Información adicional si existe -->
+                        @if (producto.DetallesVenta != null && producto.DetallesVenta.Any())
+                        {
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <strong>Ventas Relacionadas:</strong>
+                                    <p class="d-block">@producto.DetallesVenta.Count ventas</p>
+                                </div>
+                            </div>
+                        }
+
+                        @if (producto.MovimientosInventario != null && producto.MovimientosInventario.Any())
+                        {
+                            <div class="row mb-3">
+                                <div class="col-12">
+                                    <strong>Movimientos de Inventario:</strong>
+                                    <p class="d-block">@producto.MovimientosInventario.Count movimientos</p>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger text-center">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    No se encontró el producto solicitado.
+                </div>
+            }
+        </div>
+
+        <div class="card-footer text-center bg-light">
+            <button class="btn btn-primary" @onclick="Volver">
+                <i class="bi bi-arrow-left-circle-fill me-2"></i>
+                Volver a la Lista
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int ProductoId { get; set; }
+
+    private Productos? producto { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        producto = await productoService.Buscar(ProductoId);
+    }
+
+    private void Volver()
+    {
+        navigationManager.NavigateTo("/Productos/Index");
+    }
+}

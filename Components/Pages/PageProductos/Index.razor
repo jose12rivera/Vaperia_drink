@@ -1,0 +1,158 @@
+﻿@page "/Productos/Index"
+@using Vaperia_drink.Models
+@using Vaperia_drink.Services
+@inject ProductoService productoService
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Gestión de Productos</PageTitle>
+
+<div class="container-fluid vh-100 d-flex flex-column justify-content-center p-3">
+    <div class="card shadow-lg w-100 h-100">
+        <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #008DD9; color: #fff;">
+            <h3 class="m-0">Productos</h3>
+            <a href="/Productos/Create" class="btn btn-light btn-sm">
+                <i class="bi bi-plus-circle me-2"></i> Nuevo Producto
+            </a>
+        </div>
+
+        <div class="card-body overflow-auto bg-light">
+            <!-- 🔍 Barra de búsqueda -->
+            <div class="row mb-4 align-items-end">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <input @bind="valorBusqueda"
+                               @bind:event="oninput"
+                               class="form-control"
+                               placeholder="Buscar por nombre, categoría o precio" />
+                        <button @onclick="Buscar" class="btn btn-outline-primary" type="button">
+                            <i class="bi bi-search me-2"></i> Buscar
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 🧾 Tabla de productos -->
+            @if (listaProductos.Any())
+            {
+                <table class="table table-striped table-hover">
+                    <thead class="table-dark">
+                        <tr>
+                            <th>Foto</th>
+                            <th>Nombre</th>
+                            <th>Categoría</th>
+                            <th>Precio</th>
+                            <th>Stock</th>
+                            <th>Acciones</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var producto in listaProductos)
+                        {
+                            <tr>
+                                <td>
+                                    @if (!string.IsNullOrEmpty(producto.FotoUrl))
+                                    {
+                                        <img src="@producto.FotoUrl" alt="@producto.Nombre"
+                                             style="width: 50px; height: 50px; object-fit: cover;"
+                                             class="rounded" />
+                                    }
+                                    else
+                                    {
+                                        <div style="width: 50px; height: 50px; background-color: #e9ecef;
+                                                    display: flex; align-items: center; justify-content: center;"
+                                             class="rounded">
+                                            <i class="bi bi-image text-secondary"></i>
+                                        </div>
+                                    }
+                                </td>
+                                <td>@producto.Nombre</td>
+                                <td>@producto.Categoria</td>
+                                <td>@producto.Precio.ToString("C2")</td>
+                                <td>@producto.Stock</td>
+                                <td>
+                                    <div class="btn-group" role="group">
+                                        <a href="/Productos/Details/@producto.ProductoId" class="btn btn-outline-primary btn-sm">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+                                        <a href="/Productos/Edit/@producto.ProductoId" class="btn btn-outline-success btn-sm">
+                                            <i class="bi bi-pencil"></i>
+                                        </a>
+                                        <a href="/Productos/Delete/@producto.ProductoId" class="btn btn-outline-danger btn-sm">
+                                            <i class="bi bi-trash"></i>
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            }
+            else
+            {
+                <div class="alert alert-info text-center">
+                    <i class="bi bi-info-circle me-2"></i> No se encontraron productos.
+                </div>
+            }
+        </div>
+
+        <div class="card-footer bg-light d-flex justify-content-between align-items-center">
+            <p class="mb-0"><strong>Total de productos: @listaProductos.Count</strong></p>
+            <button type="button" class="btn btn-outline-secondary" @onclick="VolverAlDashboard">
+                <i class="bi bi-arrow-left me-2"></i> Volver al Dashboard
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<Productos> listaProductos = new();
+    private string valorBusqueda = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await CargarProductos();
+    }
+
+    private async Task CargarProductos()
+    {
+        try
+        {
+            listaProductos = await productoService.ListarProductos();
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al cargar productos: {ex.Message}");
+        }
+    }
+
+    private async Task Buscar()
+    {
+        try
+        {
+            string busqueda = valorBusqueda?.Trim() ?? "";
+
+            if (string.IsNullOrWhiteSpace(busqueda))
+            {
+                await CargarProductos();
+            }
+            else
+            {
+                listaProductos = await productoService.Listar(p =>
+                    p.Nombre.Contains(busqueda, StringComparison.OrdinalIgnoreCase) ||
+                    p.Categoria.Contains(busqueda, StringComparison.OrdinalIgnoreCase) ||
+                    p.Precio.ToString().Contains(busqueda, StringComparison.OrdinalIgnoreCase)
+                );
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error al buscar productos: {ex.Message}");
+        }
+    }
+
+    private void VolverAlDashboard()
+    {
+        navigationManager.NavigateTo("/Dashboard");
+    }
+}

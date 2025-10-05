@@ -1,0 +1,158 @@
+﻿@page "/Productos/Delete/{ProductoId:int}"
+@inject ProductoService productoService
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+@rendermode InteractiveServer
+
+<PageTitle>Eliminar Producto</PageTitle>
+
+<div class="container mt-5 pt-3">
+    <div class="card shadow-lg border-0">
+        <div class="card-header text-center py-4" style="background-color: #dc3545; color: #fff;">
+            <h2><i class="bi bi-exclamation-triangle me-2"></i>Confirmar Eliminación</h2>
+        </div>
+
+        <div class="card-body">
+            @if (producto != null)
+            {
+                <div class="alert alert-warning">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>¿Está seguro que desea eliminar este producto?</h5>
+                    <p class="mb-0">Esta acción no se puede deshacer.</p>
+                </div>
+
+                <div class="row">
+                    <!-- Información del Producto -->
+                    <div class="col-md-8">
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>ID del Producto:</strong>
+                                <p class="d-block">@producto.ProductoId</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Nombre:</strong>
+                                <p class="d-block">@producto.Nombre</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Categoría:</strong>
+                                <p class="d-block">@producto.Categoria</p>
+                            </div>
+                            <div class="col-md-6">
+                                <strong>Precio:</strong>
+                                <p class="d-block">@producto.Precio.ToString("C2")</p>
+                            </div>
+                        </div>
+
+                        <div class="row mb-3">
+                            <div class="col-md-6">
+                                <strong>Stock Disponible:</strong>
+                                <p class="d-block">@producto.Stock unidades</p>
+                            </div>
+                        </div>
+
+                        <!-- Advertencias -->
+                        @if (producto.DetallesVenta != null && producto.DetallesVenta.Any())
+                        {
+                            <div class="alert alert-danger mt-3">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Advertencia:</strong> Este producto tiene @producto.DetallesVenta.Count ventas asociadas.
+                                Al eliminar el producto, también se eliminarán estos registros.
+                            </div>
+                        }
+
+                        @if (producto.MovimientosInventario != null && producto.MovimientosInventario.Any())
+                        {
+                            <div class="alert alert-danger mt-3">
+                                <i class="bi bi-info-circle me-2"></i>
+                                <strong>Advertencia:</strong> Este producto tiene @producto.MovimientosInventario.Count movimientos de inventario asociados.
+                                Al eliminar el producto, también se eliminarán estos registros.
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Foto del Producto -->
+                    <div class="col-md-4 text-center">
+                        @if (!string.IsNullOrEmpty(producto.FotoUrl))
+                        {
+                            <img src="@producto.FotoUrl" alt="@producto.Nombre" class="img-fluid rounded shadow" style="max-height: 200px;" />
+                        }
+                        else
+                        {
+                            <div class="d-flex align-items-center justify-content-center bg-light rounded" style="height: 150px;">
+                                <i class="bi bi-image text-secondary" style="font-size: 3rem;"></i>
+                            </div>
+                        }
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger text-center">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    No se encontró el producto solicitado.
+                </div>
+            }
+        </div>
+
+        <div class="card-footer text-center bg-light">
+            @if (producto != null)
+            {
+                <button class="btn btn-danger me-3" @onclick="EliminarProducto">
+                    <i class="bi bi-trash-fill me-2"></i> Confirmar Eliminación
+                </button>
+            }
+            <button class="btn btn-secondary" @onclick="Volver">
+                <i class="bi bi-arrow-left-circle-fill me-2"></i> Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int ProductoId { get; set; }
+
+    private Productos? producto { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        producto = await productoService.Buscar(ProductoId);
+    }
+
+    private async Task EliminarProducto()
+    {
+        if (producto != null)
+        {
+            var eliminado = await productoService.Eliminar(producto.ProductoId);
+            if (eliminado)
+            {
+                toastService.Notify(new ToastMessage(
+                    ToastType.Success,
+                    iconName: IconName.None,
+                    title: "Eliminación Exitosa",
+                    helpText: "El producto ha sido eliminado del sistema.",
+                    message: "Producto eliminado correctamente."
+                ));
+                await Task.Delay(2000);
+                navigationManager.NavigateTo("/Productos/Index");
+            }
+            else
+            {
+                toastService.Notify(new ToastMessage(
+                    ToastType.Danger,
+                    iconName: IconName.None,
+                    title: "Error",
+                    helpText: "No se pudo eliminar el producto.",
+                    message: "Hubo un error al eliminar el producto."
+                ));
+            }
+        }
+    }
+
+    private void Volver()
+    {
+        navigationManager.NavigateTo("/Productos/Index");
+    }
+}

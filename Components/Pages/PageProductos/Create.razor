@@ -1,0 +1,154 @@
+﻿@page "/Productos/Create"
+@inject ProductoService productoService
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+@rendermode InteractiveServer
+
+<PageTitle>Registrar Producto</PageTitle>
+
+<EditForm Model="producto" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+    <Toasts class="p-3" Messages="Mensaje" AutoHide="true" StackLength="3" Placement="ToastsPlacement.TopRight" />
+
+    <div class="container-fluid vh-100 d-flex flex-column justify-content-center p-3">
+        <div class="card shadow-lg border-0 rounded-lg">
+            <div class="card-header d-flex justify-content-between align-items-center" style="background-color: #008DD9; color: #fff;">
+                <h3 class="m-0">Crear Producto</h3>
+            </div>
+
+            <div class="card-body bg-light">
+                <section class="mb-4">
+                    <h5 class="text-secondary border-bottom pb-2">Información del Producto</h5>
+
+                    <div class="row">
+                        <!-- Nombre -->
+                        <div class="col-md-6 mb-3">
+                            <label for="nombre" class="form-label"><strong>Nombre del Producto:</strong></label>
+                            <InputText id="nombre" class="form-control shadow-sm" @bind-Value="producto.Nombre" />
+                            <ValidationMessage For="@(() => producto.Nombre)" />
+                        </div>
+
+                        <!-- Categoría -->
+                        <div class="col-md-6 mb-3">
+                            <label for="categoria" class="form-label"><strong>Categoría:</strong></label>
+                            <InputText id="categoria" class="form-control shadow-sm" @bind-Value="producto.Categoria" />
+                            <ValidationMessage For="@(() => producto.Categoria)" />
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <!-- Precio -->
+                        <div class="col-md-6 mb-3">
+                            <label for="precio" class="form-label"><strong>Precio:</strong></label>
+                            <InputNumber id="precio" class="form-control shadow-sm" @bind-Value="producto.Precio" />
+                            <ValidationMessage For="@(() => producto.Precio)" />
+                        </div>
+
+                        <!-- Stock -->
+                        <div class="col-md-6 mb-3">
+                            <label for="stock" class="form-label"><strong>Stock:</strong></label>
+                            <InputNumber id="stock" class="form-control shadow-sm" @bind-Value="producto.Stock" />
+                            <ValidationMessage For="@(() => producto.Stock)" />
+                        </div>
+                    </div>
+
+                    <!-- URL de Foto -->
+                    <div class="row">
+                        <div class="col-md-12 mb-3">
+                            <label for="fotoUrl" class="form-label"><strong>URL de la Foto (Opcional):</strong></label>
+                            <InputText id="fotoUrl" class="form-control shadow-sm" @bind-Value="producto.FotoUrl" />
+                            @if (!string.IsNullOrEmpty(producto.FotoUrl))
+                            {
+                                <div class="mt-2">
+                                    <small class="text-muted">Vista previa:</small>
+                                    <img src="@producto.FotoUrl" alt="Vista previa" style="max-width: 100px; max-height: 100px;" class="mt-1 rounded border" />
+                                </div>
+                            }
+                        </div>
+                    </div>
+                </section>
+            </div>
+
+            <div class="card-footer bg-light text-center">
+                <button type="button" class="btn btn-outline-primary me-2" @onclick="Nuevo">
+                    <i class="bi bi-plus-circle-fill me-2"></i> Nuevo
+                </button>
+                <button type="submit" class="btn btn-outline-success me-2">
+                    <i class="bi bi-save me-2"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-outline-danger" @onclick="Volver">
+                    <i class="bi bi-arrow-left-circle-fill me-2"></i> Volver
+                </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private Productos producto = new Productos();
+    private EditContext editContext;
+    List<ToastMessage> Mensaje = new List<ToastMessage>();
+
+    protected override void OnInitialized()
+    {
+        editContext = new EditContext(producto);
+    }
+
+    private async Task Guardar()
+    {
+        if (editContext.Validate())
+        {
+            var guardado = await productoService.Guardar(producto);
+            if (guardado)
+            {
+                toastService.Notify(new ToastMessage(
+                    ToastType.Success,
+                    iconName: IconName.None,
+                    title: "Guardado Exitoso",
+                    helpText: "El producto se ha registrado exitosamente.",
+                    message: "El producto ha sido guardado correctamente."
+                ));
+                await Task.Delay(2000);
+                Volver();
+            }
+            else
+            {
+                toastService.Notify(new ToastMessage(
+                    ToastType.Danger,
+                    iconName: IconName.None,
+                    title: "Error",
+                    helpText: "No se pudo guardar el producto.",
+                    message: "Hubo un error al guardar el producto."
+                ));
+            }
+        }
+    }
+
+    private async Task Nuevo()
+    {
+        producto = new Productos();
+        editContext = new EditContext(producto);
+
+        toastService.Notify(new ToastMessage(
+            ToastType.Info,
+            iconName: IconName.None,
+            title: "Nuevo Registro",
+            helpText: "",
+            message: "Formulario preparado para un nuevo registro."
+        ));
+        await Task.Delay(2000);
+    }
+
+    private async Task Volver()
+    {
+        toastService.Notify(new ToastMessage(
+            ToastType.Info,
+            iconName: IconName.None,
+            title: "Volver",
+            helpText: "Regresando a la lista de productos.",
+            message: "Redirigiendo..."
+        ));
+        await Task.Delay(1500);
+        navigationManager.NavigateTo("/Productos/Index");
+    }
+}

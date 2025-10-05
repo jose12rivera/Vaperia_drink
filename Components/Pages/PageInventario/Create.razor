@@ -1,0 +1,100 @@
+﻿@page "/Inventario/Create"
+@using Vaperia_drink.Models
+@using Vaperia_drink.Services
+@inject InventarioService inventarioService
+@inject ProductoService productoService
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+@rendermode InteractiveServer
+
+<PageTitle>Registrar Movimiento de Inventario</PageTitle>
+
+<EditForm Model="inventario" OnValidSubmit="Guardar">
+    <DataAnnotationsValidator />
+
+    <div class="container-fluid vh-100 d-flex flex-column justify-content-center p-3">
+        <div class="card shadow-lg border-0 rounded-lg">
+            <div class="card-header" style="background-color: #008DD9; color: #fff;">
+                <h3 class="m-0">Registrar Movimiento</h3>
+            </div>
+
+            <div class="card-body bg-light">
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>Producto:</strong></label>
+                        <InputSelect @bind-Value="inventario.ProductoId" class="form-select shadow-sm">
+                            <option value="">-- Seleccione un Producto --</option>
+                            @foreach (var p in listaProductos)
+                            {
+                                <option value="@p.ProductoId">@p.Nombre</option>
+                            }
+                        </InputSelect>
+                        <ValidationMessage For="@(() => inventario.ProductoId)" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>Tipo de Movimiento:</strong></label>
+                        <InputSelect @bind-Value="inventario.TipoMovimiento" class="form-select shadow-sm">
+                            <option value="">-- Seleccione --</option>
+                            <option value="Entrada">Entrada</option>
+                            <option value="Salida">Salida</option>
+                        </InputSelect>
+                        <ValidationMessage For="@(() => inventario.TipoMovimiento)" />
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>Cantidad:</strong></label>
+                        <InputNumber @bind-Value="inventario.Cantidad" class="form-control shadow-sm" />
+                        <ValidationMessage For="@(() => inventario.Cantidad)" />
+                    </div>
+
+                    <div class="col-md-6 mb-3">
+                        <label class="form-label"><strong>Fecha:</strong></label>
+                        <InputDate @bind-Value="inventario.FechaMovimiento" class="form-control shadow-sm" />
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-footer bg-light text-center">
+                <button type="submit" class="btn btn-outline-success me-2">
+                    <i class="bi bi-save me-2"></i> Guardar
+                </button>
+                <button type="button" class="btn btn-outline-danger" @onclick="Volver">
+                    <i class="bi bi-arrow-left-circle-fill me-2"></i> Volver
+                </button>
+            </div>
+        </div>
+    </div>
+</EditForm>
+
+@code {
+    private Inventarios inventario = new();
+    private List<Productos> listaProductos = new();
+
+    protected override async Task OnInitializedAsync()
+    {
+        listaProductos = await productoService.Listar(p => true);
+    }
+
+    private async Task Guardar()
+    {
+        var resultado = await inventarioService.Guardar(inventario);
+        if (resultado)
+        {
+            toastService.Notify(new ToastMessage(ToastType.Success, title: "Guardado Exitoso", message: "Movimiento registrado."));
+            await Task.Delay(1500);
+            navigationManager.NavigateTo("/Inventario/Index");
+        }
+        else
+        {
+            toastService.Notify(new ToastMessage(ToastType.Danger, title: "Error", message: "No se pudo registrar el movimiento."));
+        }
+    }
+
+    private void Volver()
+    {
+        navigationManager.NavigateTo("/Inventario/Index");
+    }
+}

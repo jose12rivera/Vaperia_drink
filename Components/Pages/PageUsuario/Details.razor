@@ -1,0 +1,53 @@
+﻿@page "/Usuarios/Details/{UsuarioId:int}"
+@inject UsuarioService usuarioService
+@inject NavigationManager navigationManager
+@rendermode InteractiveServer
+
+<PageTitle>Detalle del Usuario</PageTitle>
+
+<div class="container mt-5">
+    <div class="card shadow-lg border-0">
+        <div class="card-header text-center py-4" style="background-color: #008DD9; color: #fff;">
+            <h2>Detalle del Usuario</h2>
+        </div>
+
+        <div class="card-body">
+            @if (usuario != null)
+            {
+                <p><strong>ID Usuario:</strong> @usuario.UsuarioId</p>
+                <p><strong>Nombre completo:</strong> @usuario.NombreCompleto</p>
+                <p><strong>Email:</strong> @usuario.Email</p>
+                <p><strong>Rol:</strong> @usuario.Rol</p>
+                @if (!string.IsNullOrEmpty(usuario.FotoUrl))
+                {
+                    <p><strong>Foto:</strong></p>
+                    <img src="@usuario.FotoUrl" alt="Foto Usuario" class="img-thumbnail" style="max-width:150px;" />
+                }
+            }
+            else
+            {
+                <div class="alert alert-danger text-center">
+                    <i class="bi bi-exclamation-triangle me-2"></i> Usuario no encontrado.
+                </div>
+            }
+        </div>
+
+        <div class="card-footer text-center bg-light">
+            <button class="btn btn-primary" @onclick="Volver">
+                <i class="bi bi-arrow-left-circle-fill me-2"></i> Volver a la Lista
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter] public int UsuarioId { get; set; }
+    private Usuarios? usuario;
+
+    protected override async Task OnInitializedAsync()
+    {
+        usuario = await usuarioService.Buscar(UsuarioId);
+    }
+
+    private void Volver() => navigationManager.NavigateTo("/Usuarios/Index");
+}
