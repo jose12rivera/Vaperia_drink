@@ -1,0 +1,117 @@
+﻿@page "/Inventario/Delete/{InventarioId:int}"
+@inject InventarioService inventarioService
+@inject NavigationManager navigationManager
+@inject ToastService toastService
+@rendermode InteractiveServer
+
+<PageTitle>Eliminar Movimiento</PageTitle>
+
+<div class="container mt-5 pt-3">
+    <div class="card shadow-lg border-0">
+        <div class="card-header text-center py-4" style="background-color: #dc3545; color: #fff;">
+            <h2><i class="bi bi-exclamation-triangle me-2"></i>Confirmar Eliminación</h2>
+        </div>
+
+        <div class="card-body">
+            @if (inventario != null)
+            {
+                <div class="alert alert-warning">
+                    <h5><i class="bi bi-exclamation-triangle-fill me-2"></i>¿Está seguro que desea eliminar este movimiento?</h5>
+                    <p class="mb-0">Esta acción no se puede deshacer.</p>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>ID Movimiento:</strong>
+                        <p>@inventario.InventarioId</p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Producto:</strong>
+                        <p>@inventario.Producto?.Nombre</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Tipo:</strong>
+                        <p>
+                            @if (inventario.TipoMovimiento == "Entrada")
+                            {
+                                <span class="badge bg-success">Entrada</span>
+                            }
+                            else
+                            {
+                                <span class="badge bg-danger">Salida</span>
+                            }
+                        </p>
+                    </div>
+                    <div class="col-md-6">
+                        <strong>Cantidad:</strong>
+                        <p>@inventario.Cantidad unidades</p>
+                    </div>
+                </div>
+
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <strong>Fecha:</strong>
+                        <p>@inventario.FechaMovimiento.ToString("dd/MM/yyyy HH:mm")</p>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="alert alert-danger text-center">
+                    <i class="bi bi-exclamation-triangle me-2"></i>
+                    No se encontró el movimiento solicitado.
+                </div>
+            }
+        </div>
+
+        <div class="card-footer text-center bg-light">
+            @if (inventario != null)
+            {
+                <button class="btn btn-danger me-3" @onclick="EliminarMovimiento">
+                    <i class="bi bi-trash-fill me-2"></i> Confirmar Eliminación
+                </button>
+            }
+            <button class="btn btn-secondary" @onclick="Volver">
+                <i class="bi bi-arrow-left-circle-fill me-2"></i> Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+
+@code {
+    [Parameter]
+    public int InventarioId { get; set; }
+
+    private Inventarios? inventario;
+
+    protected override async Task OnInitializedAsync()
+    {
+        inventario = await inventarioService.Buscar(InventarioId);
+    }
+
+    private async Task EliminarMovimiento()
+    {
+        if (inventario != null)
+        {
+            var eliminado = await inventarioService.Eliminar(inventario.InventarioId);
+            if (eliminado)
+            {
+                toastService.Notify(new ToastMessage(ToastType.Success, title: "Eliminación Exitosa", message: "Movimiento eliminado correctamente."));
+                await Task.Delay(1500);
+                navigationManager.NavigateTo("/Inventario/Index");
+            }
+            else
+            {
+                toastService.Notify(new ToastMessage(ToastType.Danger, title: "Error", message: "No se pudo eliminar el movimiento."));
+            }
+        }
+    }
+
+    private void Volver()
+    {
+        navigationManager.NavigateTo("/Inventario/Index");
+    }
+}
