@@ -95,4 +95,30 @@ public class InventarioService(ApplicationDbContext contexto)
             .OrderByDescending(i => i.FechaMovimiento)
             .ToListAsync();
     }
+
+    public async Task<List<Inventarios>> ListarConProductos(Expression<Func<Inventarios, bool>> criterio)
+    {
+        return await contexto.Inventarios
+            .Where(criterio)
+            .Include(i => i.Producto)
+            .AsNoTracking()
+            .ToListAsync();
+    }
+
+    public async Task<Dictionary<int, int>> ObtenerStockActual()
+    {
+        var inventario = await contexto.Inventarios
+            .Include(i => i.Producto)
+            .AsNoTracking()
+            .ToListAsync();
+
+        var stockPorProducto = inventario
+            .GroupBy(i => i.ProductoId)
+            .ToDictionary(
+                g => g.Key,
+                g => g.Sum(i => i.TipoMovimiento == "Entrada" ? i.Cantidad : -i.Cantidad)
+            );
+
+        return stockPorProducto;
+    }
 }

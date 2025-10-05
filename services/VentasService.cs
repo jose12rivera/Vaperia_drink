@@ -295,6 +295,40 @@ public class VentasService(ApplicationDbContext contexto)
         }
     }
 
+    public async Task<(bool success, string message, int ventaId)> GuardarVentaCompletaConInventario(Ventas venta, List<DetalleVentas> detalles, List<Inventarios> movimientosInventario)
+    {
+        using var transaction = await contexto.Database.BeginTransactionAsync();
+
+        try
+        {
+            // Guardar venta
+            contexto.Ventas.Add(venta);
+            await contexto.SaveChangesAsync();
+
+            // Asignar VentaId a los detalles
+            foreach (var detalle in detalles)
+            {
+                detalle.VentaId = venta.VentaId;
+            }
+
+            // Guardar detalles
+            contexto.DetalleVentas.AddRange(detalles);
+
+            // Guardar movimientos de inventario
+            contexto.Inventarios.AddRange(movimientosInventario);
+
+            await contexto.SaveChangesAsync();
+            await transaction.CommitAsync();
+
+            return (true, "Venta completada exitosamente", venta.VentaId);
+        }
+        catch (Exception ex)
+        {
+            await transaction.RollbackAsync();
+            return (false, "Error al guardar la venta: " + ex.Message, 0);
+        }
+    }
+
     // MÉTODO NUEVO: Obtener reporte de ventas por rango de fechas
     public async Task<List<Ventas>> ObtenerVentasPorRangoFechas(DateTime fechaInicio, DateTime fechaFin)
     {
